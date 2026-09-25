@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.TeachersView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,380">
+
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DataGrid ItemsSource="{Binding Items}"
+                          SelectedItem="{Binding Selected}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding FullName}" Width="*" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" />
+                        <DataGridTextColumn Header="Min" Binding="{Binding MinWeeklyPeriods}" Width="60" />
+                        <DataGridTextColumn Header="Max" Binding="{Binding MaxWeeklyPeriods}" Width="60" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card">
+                <ScrollViewer>
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{Binding FormTitle}" Classes="h2" />
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Full name" />
+                            <TextBox Text="{Binding FullName}" Watermark="e.g. Ayesha Khan" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="CNIC" />
+                            <TextBox Text="{Binding Cnic}" Watermark="e.g. 35202-1234567-1" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Qualification" />
+                            <TextBox Text="{Binding Qualification}" Watermark="e.g. MSc Physics" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel Spacing="6" Width="160">
+                                <TextBlock Text="Phone" />
+                                <TextBox Text="{Binding Phone}" />
+                            </StackPanel>
+                            <StackPanel Spacing="6" Width="160">
+                                <TextBlock Text="Email" />
+                                <TextBox Text="{Binding Email}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Type" />
+                            <ComboBox ItemsSource="{Binding TeacherTypes}"
+                                      SelectedItem="{Binding Type}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel Spacing="6" Width="100">
+                                <TextBlock Text="Min / week" />
+                                <NumericUpDown Value="{Binding MinWeeklyPeriods}" Minimum="0" Maximum="60" Increment="1" FormatString="0" />
+                            </StackPanel>
+                            <StackPanel Spacing="6" Width="100">
+                                <TextBlock Text="Max / week" />
+                                <NumericUpDown Value="{Binding MaxWeeklyPeriods}" Minimum="1" Maximum="60" Increment="1" FormatString="0" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                            <Button Content="Save" Classes="primary" Command="{Binding SaveCommand}" />
+                            <Button Content="New" Classes="ghost" Command="{Binding NewCommand}" />
+                            <Button Content="Delete" Classes="danger" Command="{Binding DeleteCommand}" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap"
+                                   IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,130 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.TeacherPeriodsView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="280,*">
+
+            <!-- Teacher list -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Teachers" Classes="h2" Margin="16,16,16,8" />
+                    <ListBox ItemsSource="{Binding Teachers}"
+                             SelectedItem="{Binding SelectedTeacher}"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Spacing="2" Margin="4">
+                                    <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Qualification}" Classes="muted" FontSize="12" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Right: assigned classes + the period editor -->
+            <Grid Grid.Column="1" ColumnDefinitions="300,*">
+
+                <!-- Assigned classes for the selected teacher -->
+                <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="16,16,16,8">
+                            <TextBlock Text="Assigned classes" Classes="h2" />
+                            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                       Text="Classes this teacher is pinned to. Pick one to set its preferred periods." />
+                        </StackPanel>
+
+                        <!-- Assign another class + status (always visible) -->
+                        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="16,8,16,16">
+                            <TextBlock Text="Assign another class" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox ItemsSource="{Binding AssignableDemands}"
+                                      SelectedItem="{Binding DemandToAssign}"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Choose a class…">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Content="Assign to teacher" Classes="ghost"
+                                    Command="{Binding AssignDemandCommand}"
+                                    HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap" Margin="0,4,0,0"
+                                       IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+
+                        <ListBox ItemsSource="{Binding Assignments}"
+                                 SelectedItem="{Binding SelectedAssignment}"
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Spacing="2" Margin="4">
+                                        <TextBlock Text="{Binding Header}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding PreferredText}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+
+                <!-- Period editor for the selected assignment -->
+                <Border Grid.Column="1" Classes="card">
+                    <Panel>
+                        <!-- Shown when a class is selected -->
+                        <DockPanel IsVisible="{Binding HasSelectedAssignment}">
+                            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+                                <TextBlock Text="{Binding SelectedAssignment.Header}" Classes="h2" />
+                                <TextBlock Classes="muted" TextWrapping="Wrap"
+                                           Text="Tick the periods this teacher prefers for this class, then set how strongly to honour it. The preference is soft — the solver only breaks it when it must." />
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <StackPanel Spacing="6" Width="150">
+                                        <TextBlock Text="Priority (0 = ignore)" />
+                                        <NumericUpDown Value="{Binding Priority}" Minimum="0" Maximum="100" Increment="1" FormatString="0" />
+                                    </StackPanel>
+                                    <Button Content="Save preference" Classes="primary"
+                                            Command="{Binding SavePreferenceCommand}" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Periods}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Name}"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      Margin="0,4" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+
+                        <!-- Shown when the teacher has no class selected/assigned -->
+                        <TextBlock IsVisible="{Binding !HasSelectedAssignment}"
+                                   Classes="muted" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   TextAlignment="Center" MaxWidth="320"
+                                   Text="Pick an assigned class on the left to set its preferred periods. If the list is empty, pin this teacher to a class here or on the Classes screen first." />
+                    </Panel>
+                </Border>
+
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

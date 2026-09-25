@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dg="using:Avalonia.Controls"
+             x:Class="SmartTimetable.Desktop.Views.SubjectPairingView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,380">
+
+            <!-- List -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DataGrid ItemsSource="{Binding Rules}"
+                          SelectedItem="{Binding Selected}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Subject" Binding="{Binding SubjectA.Name}" Width="*" />
+                        <DataGridTextColumn Header="May run at the same time as" Binding="{Binding SubjectB.Name}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Editor -->
+            <Border Grid.Column="1" Classes="card">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="{Binding FormTitle}" Classes="h2" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Subject" />
+                        <ComboBox ItemsSource="{Binding Subjects}"
+                                  SelectedItem="{Binding SelectedSubjectA}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="May run at the same time as" />
+                        <ComboBox ItemsSource="{Binding Subjects}"
+                                  SelectedItem="{Binding SelectedSubjectB}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                        <Button Content="Save" Classes="primary" Command="{Binding SaveCommand}" />
+                        <Button Content="New" Classes="ghost" Command="{Binding NewCommand}" />
+                        <Button Content="Delete" Classes="danger" Command="{Binding DeleteCommand}" />
+                    </StackPanel>
+
+                    <Border Classes="banner" Classes.error="{Binding StatusIsError}"
+                            IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+                    </Border>
+
+                    <TextBlock Classes="muted" TextWrapping="Wrap"
+                               Text="Pairing is a soft hint. The generator prefers to align the two subjects in the same period but will break the pairing if it has to, to keep the timetable valid." />
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

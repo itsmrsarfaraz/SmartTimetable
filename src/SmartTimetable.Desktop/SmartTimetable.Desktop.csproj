@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SmartTimetable.Desktop</RootNamespace>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Native icon baked into SmartTimetable.exe (Explorer, taskbar, Alt-Tab). -->
+    <ApplicationIcon>Assets\timetable.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Everything under Assets (the app icon) is embedded as an Avalonia resource
+         so it can be referenced from XAML, e.g. Icon="/Assets/timetable.ico". -->
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.1" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="QuestPDF" Version="2024.12.3" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartTimetable.Domain\SmartTimetable.Domain.csproj" />
+    <ProjectReference Include="..\SmartTimetable.Application\SmartTimetable.Application.csproj" />
+    <ProjectReference Include="..\SmartTimetable.Infrastructure\SmartTimetable.Infrastructure.csproj" />
+    <ProjectReference Include="..\SmartTimetable.Solver\SmartTimetable.Solver.csproj" />
+    <ProjectReference Include="..\SmartTimetable.Licensing\SmartTimetable.Licensing.csproj" />
+  </ItemGroup>
+
+</Project>

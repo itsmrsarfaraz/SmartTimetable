@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SmartTimetable.Licensing</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WMI access for hardware serials (Windows only; guarded at runtime) -->
+    <PackageReference Include="System.Management" Version="10.0.0" />
+    <!-- Registry access (MachineGuid). Not in the portable net10.0 reference set; the
+         consuming code is [SupportedOSPlatform("windows")]-guarded. -->
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

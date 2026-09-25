@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.ShellView"
+             x:CompileBindings="False">
+
+    <Grid ColumnDefinitions="250,*">
+
+        <!-- Navigation rail -->
+        <Border Grid.Column="0" Background="#0F172A">
+            <DockPanel LastChildFill="True">
+
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,16" Spacing="2">
+                    <TextBlock Text="SmartTimetable AI" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="Admin Console" Foreground="#64748B" FontSize="12" />
+                </StackPanel>
+
+                <!-- Footer (user + logout) -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="16,12,16,20" Spacing="10">
+                    <Border Background="#1E293B" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding UserName}" Foreground="White" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding LicensedTo, StringFormat='Licensed to {0}'}" Foreground="#94A3B8" FontSize="11" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ActiveSessionName, StringFormat='Session: {0}'}" Foreground="#94A3B8" FontSize="11" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Border>
+                    <Button Content="Sign out" Classes="nav" Command="{Binding LogoutCommand}" />
+                </StackPanel>
+
+                <!-- Nav items -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="12,4" Spacing="2">
+                        <Button Content="Dashboard"          Classes="nav" Command="{Binding NavigateDashboardCommand}" />
+                        <Button Content="Academic Structure" Classes="nav" Command="{Binding NavigateAcademicStructureCommand}" />
+                        <Button Content="Subjects"           Classes="nav" Command="{Binding NavigateSubjectsCommand}" />
+                        <Button Content="Rooms"              Classes="nav" Command="{Binding NavigateRoomsCommand}" />
+                        <Button Content="Periods"            Classes="nav" Command="{Binding NavigatePeriodsCommand}" />
+                        <Button Content="Teachers"           Classes="nav" Command="{Binding NavigateTeachersCommand}" />
+                        <Button Content="Classes"            Classes="nav" Command="{Binding NavigateClassesCommand}" />
+                        <Button Content="Combined Classes"   Classes="nav" Command="{Binding NavigateCombinedCommand}" />
+                        <Button Content="Contradictory Subjects" Classes="nav" Command="{Binding NavigateContradictionsCommand}" />
+                        <Button Content="Subject Pairing"     Classes="nav" Command="{Binding NavigatePairingCommand}" />
+                        <Button Content="Teacher Subjects"   Classes="nav" Command="{Binding NavigateMappingCommand}" />
+                        <Button Content="Teacher Periods"    Classes="nav" Command="{Binding NavigateTeacherPeriodsCommand}" />
+                        <Button Content="Teacher Availability" Classes="nav" Command="{Binding NavigateAvailabilityCommand}" />
+                        <Separator Margin="8,10" Background="#1E293B" />
+                        <Button Content="Generate"           Classes="nav" Command="{Binding NavigateGenerateCommand}" />
+                        <Button Content="Timetable"          Classes="nav" Command="{Binding NavigateTimetableCommand}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+            </DockPanel>
+        </Border>
+
+        <!-- Content area -->
+        <Border Grid.Column="1" Background="#F8FAFC">
+            <ContentControl Content="{Binding CurrentPage}" />
+        </Border>
+
+    </Grid>
+</UserControl>

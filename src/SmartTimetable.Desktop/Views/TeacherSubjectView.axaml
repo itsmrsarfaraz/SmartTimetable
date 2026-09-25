@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.TeacherSubjectView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="320,*">
+
+            <!-- Teacher list -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Teachers" Classes="h2" Margin="16,16,16,8" />
+                    <ListBox ItemsSource="{Binding Teachers}"
+                             SelectedItem="{Binding SelectedTeacher}"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Spacing="2" Margin="4">
+                                    <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Qualification}" Classes="muted" FontSize="12" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Subject assignment -->
+            <Border Grid.Column="1" Classes="card">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+                        <TextBlock Text="Subjects this teacher can teach" Classes="h2" />
+                        <TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="Tick every subject the selected teacher is qualified for. The solver only assigns teachers to subjects they can teach." />
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+                        <Button Content="Save assignments" Classes="primary" Command="{Binding SaveCommand}" HorizontalAlignment="Left" />
+                        <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap"
+                                   IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding SubjectToggles}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}"
+                                              IsChecked="{Binding IsAssigned}"
+                                              Margin="0,4" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

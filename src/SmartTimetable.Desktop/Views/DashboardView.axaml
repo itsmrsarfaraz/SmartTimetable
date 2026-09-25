@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.DashboardView"
+             x:CompileBindings="False">
+
+    <ScrollViewer>
+        <StackPanel Margin="32" Spacing="20">
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="{Binding Title}" Classes="h1" />
+                <TextBlock Text="{Binding Description}" Classes="muted" />
+            </StackPanel>
+
+            <WrapPanel>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SubjectCount}" FontSize="34" FontWeight="Bold" Foreground="#2563EB" />
+                        <TextBlock Text="Subjects" Classes="muted" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TeacherCount}" FontSize="34" FontWeight="Bold" Foreground="#2563EB" />
+                        <TextBlock Text="Teachers" Classes="muted" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ClassCount}" FontSize="34" FontWeight="Bold" Foreground="#2563EB" />
+                        <TextBlock Text="Classes" Classes="muted" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding RoomCount}" FontSize="34" FontWeight="Bold" Foreground="#2563EB" />
+                        <TextBlock Text="Rooms" Classes="muted" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding PeriodCount}" FontSize="34" FontWeight="Bold" Foreground="#2563EB" />
+                        <TextBlock Text="Periods" Classes="muted" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Width="220" Height="110" Margin="0,0,16,16">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TimetableCount}" FontSize="34" FontWeight="Bold" Foreground="#16A34A" />
+                        <TextBlock Text="Timetables" Classes="muted" />
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Getting started" Classes="h2" />
+                    <TextBlock Classes="muted" TextWrapping="Wrap"
+                               Text="1. Review Subjects, Rooms and Periods.  2. Add Teachers and map their subjects.  3. Create Classes and set each class's weekly subjects.  4. Open Generate and produce timetable options.  5. Review a timetable, keep the best one, and export it." />
+                    <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,8,0,0">
+                        <TextBlock Text="{Binding SessionName, StringFormat='Active session: {0}'}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding LicensedTo, StringFormat='Licensed to: {0}'}" FontWeight="SemiBold" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

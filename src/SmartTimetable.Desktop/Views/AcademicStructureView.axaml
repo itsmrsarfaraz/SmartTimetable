@@ -1,0 +1,232 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.AcademicStructureView"
+             x:CompileBindings="False">
+
+	<Grid Margin="24" RowDefinitions="Auto,*">
+
+		<!-- Header -->
+		<StackPanel Grid.Row="0" Spacing="2" Margin="0,0,0,16">
+			<TextBlock Text="{Binding Title}" Classes="h1" />
+			<TextBlock Text="{Binding Description}" Classes="muted" />
+		</StackPanel>
+
+		<!-- Main Scrollable Content -->
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+			<StackPanel Spacing="14">
+
+				<!-- ===================== 1. Campuses ===================== -->
+				<Border Classes="card">
+					<StackPanel Spacing="10">
+						<TextBlock Text="1 · Campuses" Classes="h2" />
+						<TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="A campus is the top of the tree. Everything else — sessions, departments, programs — belongs to the campus you select here." />
+
+						<Grid ColumnDefinitions="*,300">
+							<Border Grid.Column="0" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,14,0" MinHeight="130">
+								<DataGrid ItemsSource="{Binding Campuses}"
+                                          SelectedItem="{Binding SelectedCampus}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+										<DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="120" />
+									</DataGrid.Columns>
+								</DataGrid>
+							</Border>
+
+							<StackPanel Grid.Column="1" Spacing="8">
+								<TextBlock Text="{Binding CampusFormTitle}" Classes="h3" />
+								<StackPanel Spacing="3">
+									<TextBlock Text="Campus name" FontSize="12" />
+									<TextBox Text="{Binding CampusName}" Watermark="e.g. Main Campus" />
+								</StackPanel>
+								<StackPanel Spacing="3">
+									<TextBlock Text="Address" FontSize="12" />
+									<TextBox Text="{Binding CampusAddress}" Watermark="Optional" />
+								</StackPanel>
+								<StackPanel Spacing="3">
+									<TextBlock Text="Phone" FontSize="12" />
+									<TextBox Text="{Binding CampusPhone}" Watermark="Optional" />
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+									<Button Content="Save" Classes="primary" Command="{Binding SaveCampusCommand}" />
+									<Button Content="New" Classes="ghost" Command="{Binding NewCampusCommand}" />
+									<Button Content="Delete" Classes="danger" Command="{Binding DeleteCampusCommand}" />
+								</StackPanel>
+								<Border Classes="banner" Classes.error="{Binding CampusStatusIsError}"
+                                        IsVisible="{Binding CampusStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+									<TextBlock Text="{Binding CampusStatus}" TextWrapping="Wrap" />
+								</Border>
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+				<!-- ===================== 2. Sessions ===================== -->
+				<Border Classes="card">
+					<StackPanel Spacing="10">
+						<TextBlock Text="2 · Academic sessions" Classes="h2" />
+						<TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="A session is a school year/term with its own working days. Mark one session Active — the timetable generator uses the active session's working days." />
+
+						<Grid ColumnDefinitions="*,300">
+							<Border Grid.Column="0" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,14,0" MinHeight="130">
+								<DataGrid ItemsSource="{Binding Sessions}"
+                                          SelectedItem="{Binding SelectedSession}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+										<DataGridTextColumn Header="Start" Binding="{Binding StartDate}" Width="95" />
+										<DataGridTextColumn Header="End" Binding="{Binding EndDate}" Width="95" />
+										<DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60" />
+									</DataGrid.Columns>
+								</DataGrid>
+							</Border>
+
+							<StackPanel Grid.Column="1" Spacing="8">
+								<TextBlock Text="{Binding SessionFormTitle}" Classes="h3" />
+								<StackPanel Spacing="3">
+									<TextBlock Text="Session name" FontSize="12" />
+									<TextBox Text="{Binding SessionName}" Watermark="e.g. 2026-2027" />
+								</StackPanel>
+								<Grid ColumnDefinitions="*,*" Margin="0">
+									<StackPanel Grid.Column="0" Spacing="3" Margin="0,0,6,0">
+										<TextBlock Text="Start date" FontSize="12" />
+										<DatePicker SelectedDate="{Binding SessionStart}" HorizontalAlignment="Stretch" />
+									</StackPanel>
+									<StackPanel Grid.Column="1" Spacing="3" Margin="6,0,0,0">
+										<TextBlock Text="End date" FontSize="12" />
+										<DatePicker SelectedDate="{Binding SessionEnd}" HorizontalAlignment="Stretch" />
+									</StackPanel>
+								</Grid>
+								<StackPanel Spacing="3">
+									<TextBlock Text="Working days" FontSize="12" />
+									<ItemsControl ItemsSource="{Binding WorkingDays}">
+										<ItemsControl.ItemsPanel>
+											<ItemsPanelTemplate>
+												<WrapPanel />
+											</ItemsPanelTemplate>
+										</ItemsControl.ItemsPanel>
+										<ItemsControl.ItemTemplate>
+											<DataTemplate>
+												<CheckBox Content="{Binding Label}" IsChecked="{Binding IsOn}" Margin="0,0,8,4" />
+											</DataTemplate>
+										</ItemsControl.ItemTemplate>
+									</ItemsControl>
+								</StackPanel>
+								<CheckBox Content="Set as active session" IsChecked="{Binding SessionIsActive}" />
+								<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+									<Button Content="Save" Classes="primary" Command="{Binding SaveSessionCommand}" />
+									<Button Content="New" Classes="ghost" Command="{Binding NewSessionCommand}" />
+									<Button Content="Delete" Classes="danger" Command="{Binding DeleteSessionCommand}" />
+								</StackPanel>
+								<Border Classes="banner" Classes.error="{Binding SessionStatusIsError}"
+                                        IsVisible="{Binding SessionStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+									<TextBlock Text="{Binding SessionStatus}" TextWrapping="Wrap" />
+								</Border>
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+				<!-- ===================== 3. Departments ===================== -->
+				<Border Classes="card">
+					<StackPanel Spacing="10">
+						<TextBlock Text="3 · Departments" Classes="h2" />
+						<TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="Departments group your programs — e.g. a School wing and a College wing on the same campus." />
+
+						<Grid ColumnDefinitions="*,300">
+							<Border Grid.Column="0" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,14,0" MinHeight="120">
+								<DataGrid ItemsSource="{Binding Departments}"
+                                          SelectedItem="{Binding SelectedDepartment}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+										<DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="110" />
+									</DataGrid.Columns>
+								</DataGrid>
+							</Border>
+
+							<StackPanel Grid.Column="1" Spacing="8">
+								<TextBlock Text="{Binding DepartmentFormTitle}" Classes="h3" />
+								<StackPanel Spacing="3">
+									<TextBlock Text="Department name" FontSize="12" />
+									<TextBox Text="{Binding DepartmentName}" Watermark="e.g. College Wing" />
+								</StackPanel>
+								<StackPanel Spacing="3">
+									<TextBlock Text="Kind" FontSize="12" />
+									<ComboBox ItemsSource="{Binding DepartmentKinds}"
+                                              SelectedItem="{Binding DepartmentKind}"
+                                              HorizontalAlignment="Stretch" />
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+									<Button Content="Save" Classes="primary" Command="{Binding SaveDepartmentCommand}" />
+									<Button Content="New" Classes="ghost" Command="{Binding NewDepartmentCommand}" />
+									<Button Content="Delete" Classes="danger" Command="{Binding DeleteDepartmentCommand}" />
+								</StackPanel>
+								<Border Classes="banner" Classes.error="{Binding DepartmentStatusIsError}"
+                                        IsVisible="{Binding DepartmentStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+									<TextBlock Text="{Binding DepartmentStatus}" TextWrapping="Wrap" />
+								</Border>
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+				<!-- ===================== 4. Programs ===================== -->
+				<Border Classes="card">
+					<StackPanel Spacing="10">
+						<TextBlock Text="4 · Programs" Classes="h2" />
+						<TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="Programs are what classes attach to (e.g. Pre-Medical, ICS). Select a department above, then add its programs here." />
+
+						<Grid ColumnDefinitions="*,300">
+							<Border Grid.Column="0" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,0,14,0" MinHeight="120">
+								<DataGrid ItemsSource="{Binding Programs}"
+                                          SelectedItem="{Binding SelectedProgram}"
+                                          AutoGenerateColumns="False" IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+										<DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="120" />
+									</DataGrid.Columns>
+								</DataGrid>
+							</Border>
+
+							<StackPanel Grid.Column="1" Spacing="8">
+								<TextBlock Text="{Binding ProgramFormTitle}" Classes="h3" />
+								<TextBlock Classes="muted" FontStyle="Italic" TextWrapping="Wrap"
+                                         IsVisible="{Binding SelectedDepartment, Converter={x:Static ObjectConverters.IsNull}}"
+                                         Text="Select a department in section 3 first." />
+								<StackPanel Spacing="3">
+									<TextBlock Text="Program name" FontSize="12" />
+									<TextBox Text="{Binding ProgramName}" Watermark="e.g. Pre-Medical" />
+								</StackPanel>
+								<StackPanel Spacing="3">
+									<TextBlock Text="Kind" FontSize="12" />
+									<ComboBox ItemsSource="{Binding ProgramKinds}"
+                                              SelectedItem="{Binding ProgramKind}"
+                                              HorizontalAlignment="Stretch" />
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+									<Button Content="Save" Classes="primary" Command="{Binding SaveProgramCommand}" />
+									<Button Content="New" Classes="ghost" Command="{Binding NewProgramCommand}" />
+									<Button Content="Delete" Classes="danger" Command="{Binding DeleteProgramCommand}" />
+								</StackPanel>
+								<Border Classes="banner" Classes.error="{Binding ProgramStatusIsError}"
+                                        IsVisible="{Binding ProgramStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+									<TextBlock Text="{Binding ProgramStatus}" TextWrapping="Wrap" />
+								</Border>
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.LicenseView"
+             x:CompileBindings="False"
+             Background="#F8FAFC">
+
+    <Grid>
+        <Border Classes="card"
+                Width="560"
+                Padding="36"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="16">
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="SmartTimetable AI" Classes="h1" />
+                    <TextBlock Classes="muted"
+                               Text="Activate this installation. Send your activation code to your vendor to receive a license key." />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Your activation code" Classes="h2" />
+                    <TextBlock Classes="muted"
+                               Text="Copy this and send it to the vendor. It is unique to this computer." />
+                    <TextBox Text="{Binding MachineId}"
+                             IsReadOnly="True"
+                             FontFamily="Cascadia Mono, Consolas, monospace"
+                             FontSize="16" />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="License key" Classes="h2" />
+                    <TextBox Text="{Binding LicenseKey}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinHeight="90"
+                             Watermark="Paste the license key you received here" />
+                </StackPanel>
+
+                <Button Content="Activate"
+                        Classes="primary"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ActivateCommand}" />
+
+                <TextBlock Text="{Binding StatusMessage}"
+                           TextWrapping="Wrap"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           Foreground="#DC2626" />
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

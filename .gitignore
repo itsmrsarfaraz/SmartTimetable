@@ -1,0 +1,35 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## Build output
+publish/
+artifacts/
+dist/
+
+## SQLite local database
+*.db
+*.db-shm
+*.db-wal
+app.db
+
+## Licensing secrets — NEVER commit the vendor private key
+*private*.xml
+*private*.pem
+vendor_private*
+license.key
+
+## OS
+Thumbs.db
+.DS_Store
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Issued customer licenses + vendor tracking log (never commit)
+*.lic
+issued_licenses*.csv

@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.CombinedClassesView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,420">
+
+            <!-- Rule list -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DataGrid ItemsSource="{Binding Rules}"
+                          SelectedItem="{Binding Selected}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                        <DataGridTextColumn Header="Subject" Binding="{Binding Subject.Name}" Width="160" />
+                        <DataGridTextColumn Header="Sections" Binding="{Binding Members.Count}" Width="90" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Editor + members -->
+            <Border Grid.Column="1" Classes="card">
+                <ScrollViewer>
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{Binding FormTitle}" Classes="h2" />
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Name" />
+                            <TextBox Text="{Binding Name}" Watermark="e.g. FSc Part 1 — Islamiat (combined)" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Subject taught together" />
+                            <ComboBox ItemsSource="{Binding Subjects}" SelectedItem="{Binding SelectedSubject}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Shared room" />
+                            <ComboBox ItemsSource="{Binding Rooms}" SelectedItem="{Binding SelectedRoom}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Preferred teacher" />
+                            <ComboBox ItemsSource="{Binding Teachers}" SelectedItem="{Binding SelectedTeacher}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding FullName}" /></DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                            <Button Content="Save" Classes="primary" Command="{Binding SaveRuleCommand}" />
+                            <Button Content="New" Classes="ghost" Command="{Binding NewCommand}" />
+                            <Button Content="Delete" Classes="danger" Command="{Binding DeleteRuleCommand}" />
+                        </StackPanel>
+
+                        <Border Classes="banner" Classes.error="{Binding StatusIsError}"
+                                IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+                        </Border>
+
+                        <Separator Background="#E2E8F0" Margin="0,6" />
+
+                        <TextBlock Text="Sections in this group" Classes="h2" />
+                        <TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="Add every section that attends this subject together. Each section must also list the subject in its own weekly subjects (Classes screen) with the same periods per week." />
+
+                        <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" MaxHeight="200">
+                            <DataGrid ItemsSource="{Binding Members}"
+                                      SelectedItem="{Binding SelectedMember}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Section" Binding="{Binding Name}" Width="*" />
+                                    <DataGridTextColumn Header="Section#" Binding="{Binding Section}" Width="90" />
+                                    <DataGridTextColumn Header="Grade" Binding="{Binding GradeLevel}" Width="70" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <TextBlock Classes="muted" FontStyle="Italic" TextWrapping="Wrap"
+                                   IsVisible="{Binding !CanEditMembers}"
+                                   Text="Save the combined class above first — then this section unlocks so you can add member sections." />
+
+                        <StackPanel Spacing="12" IsEnabled="{Binding CanEditMembers}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Add a section" />
+                                <ComboBox ItemsSource="{Binding Classes}" SelectedItem="{Binding MemberToAdd}" HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="Add section" Classes="primary" Command="{Binding AddMemberCommand}" />
+                                <Button Content="Remove selected" Classes="ghost" Command="{Binding RemoveMemberCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Classes="banner" Classes.error="{Binding MemberStatusIsError}"
+                                IsVisible="{Binding MemberStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding MemberStatus}" TextWrapping="Wrap" />
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

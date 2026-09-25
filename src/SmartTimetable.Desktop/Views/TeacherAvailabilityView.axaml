@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.TeacherAvailabilityView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,420">
+
+            <!-- Teacher list -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0" Padding="0">
+                <DataGrid ItemsSource="{Binding Teachers}"
+                          SelectedItem="{Binding SelectedTeacher}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Teacher" Binding="{Binding FullName}" Width="*" />
+                        <DataGridTextColumn Header="Windows" Binding="{Binding Availabilities.Count}" Width="90" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Windows editor -->
+            <Border Grid.Column="1" Classes="card">
+                <ScrollViewer>
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Availability windows" Classes="h2" />
+                        <TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="No windows = available in every slot. Add a window per day the teacher works; only periods that fit fully inside a window are usable, and days without a window become unavailable." />
+
+                        <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" MaxHeight="240">
+                            <DataGrid ItemsSource="{Binding Windows}"
+                                      SelectedItem="{Binding SelectedWindow}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Day" Binding="{Binding Day}" Width="*" />
+                                    <DataGridTextColumn Header="From" Binding="{Binding AvailableFrom, StringFormat='{}{0:HH\\:mm}'}" Width="90" />
+                                    <DataGridTextColumn Header="To" Binding="{Binding AvailableTo, StringFormat='{}{0:HH\\:mm}'}" Width="90" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <StackPanel Spacing="12" IsEnabled="{Binding CanEditWindows}">
+                            <TextBlock Text="{Binding FormTitle}" Classes="h3" />
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Day" />
+                                <ComboBox ItemsSource="{Binding Weekdays}" SelectedItem="{Binding Day}" HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="From" />
+                                    <TimePicker SelectedTime="{Binding FromTime}" ClockIdentifier="24HourClock" />
+                                </StackPanel>
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="To" />
+                                    <TimePicker SelectedTime="{Binding ToTime}" ClockIdentifier="24HourClock" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                                <Button Content="Save window" Classes="primary" Command="{Binding SaveWindowCommand}" />
+                                <Button Content="New" Classes="ghost" Command="{Binding NewWindowCommand}" />
+                                <Button Content="Delete" Classes="danger" Command="{Binding DeleteWindowCommand}" />
+                            </StackPanel>
+
+                            <Button Content="Clear all — make fully available" Classes="secondary"
+                                    Command="{Binding ClearAllForTeacherCommand}" HorizontalAlignment="Left" />
+                        </StackPanel>
+
+                        <Border Classes="banner" Classes.error="{Binding StatusIsError}"
+                                IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

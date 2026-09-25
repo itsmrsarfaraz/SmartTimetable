@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.GenerateView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,20">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="380,*">
+
+            <!-- Controls -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,20,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+                        <TextBlock Text="Strategies" Classes="h2" />
+                        <TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="Each selected strategy produces one candidate timetable you can compare." />
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="12" Margin="0,16,0,0">
+
+                        <!-- Custom-strategy weights (only when Custom is ticked) -->
+                        <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="12"
+                                IsVisible="{Binding CustomStrategy.IsSelected}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Custom weights" FontWeight="SemiBold" />
+                                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                           Text="Higher = the solver tries harder to honour that goal. 0 turns it off." />
+                                <!-- Avalonia 11.2 has no Grid RowSpacing/ColumnSpacing; spacing is done via cell margins. -->
+								<!-- Avalonia 11.x compatible Grid layout -->
+								<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+									<StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,5,8">
+										<TextBlock Text="Teacher preferences" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightTeacherPref}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="5,0,0,8">
+										<TextBlock Text="Avoid last period" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightLastPeriod}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,5,8">
+										<TextBlock Text="Avoid afternoon" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightAfternoon}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="5,0,0,8">
+										<TextBlock Text="Meet minimum load" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightUnderMin}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="2" Grid.Column="0" Spacing="4" Margin="0,0,5,8">
+										<TextBlock Text="Labs in prime slots" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightLabOffPeak}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="2" Grid.Column="1" Spacing="4" Margin="5,0,0,8">
+										<TextBlock Text="Preferred periods" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightPeriodPref}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+									<StackPanel Grid.Row="3" Grid.Column="0" Spacing="4" Margin="0,0,5,0">
+										<TextBlock Text="Subject pairing" FontSize="12" />
+										<NumericUpDown Value="{Binding WeightPairing}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
+									</StackPanel>
+								</Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel Spacing="6" Width="150">
+                                <TextBlock Text="Seconds per strategy" />
+                                <NumericUpDown Value="{Binding MaxSeconds}" Minimum="1" Maximum="120" Increment="1" FormatString="0" />
+                            </StackPanel>
+                            <StackPanel Spacing="6" Width="150">
+                                <TextBlock Text="Random seed" />
+                                <NumericUpDown Value="{Binding RandomSeed}" Minimum="1" Maximum="99999" Increment="1" FormatString="0" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Content="Generate" Classes="primary"
+                                    Command="{Binding GenerateCommand}"
+                                    IsVisible="{Binding !IsBusy}" />
+                            <Button Content="Cancel" Classes="danger"
+                                    Command="{Binding CancelCommand}"
+                                    IsVisible="{Binding IsBusy}" />
+                            <TextBlock Text="Solving…" VerticalAlignment="Center" Classes="muted"
+                                       IsVisible="{Binding IsBusy}" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap"
+                                   IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Strategies}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                        <StackPanel Spacing="4">
+                                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Blurb}" Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="26,0,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- Results -->
+            <Border Grid.Column="1" Classes="card" Padding="0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Candidate timetables" Classes="h2" Margin="16,16,16,8" />
+                    <DataGrid ItemsSource="{Binding Options}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Strategy" Binding="{Binding Strategy}" Width="150" />
+                            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="80" />
+                            <DataGridTextColumn Header="Placed" Binding="{Binding PlacedLessons}" Width="80" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="130" />
+                            <DataGridTemplateColumn Header="" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Open"
+                                                Classes="ghost"
+                                                Margin="6,4"
+                                                Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+
+        </Grid>
+    </Grid>
+</UserControl>

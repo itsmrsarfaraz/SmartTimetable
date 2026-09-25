@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="src/SmartTimetable.Domain/SmartTimetable.Domain.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/SmartTimetable.Infrastructure/SmartTimetable.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="src/SmartTimetable.Application/SmartTimetable.Application.csproj" />
+  <Project Path="src/SmartTimetable.Licensing/SmartTimetable.Licensing.csproj" />
+  <Project Path="src/SmartTimetable.Solver/SmartTimetable.Solver.csproj" />
+  <Project Path="src/SmartTimetable.Desktop/SmartTimetable.Desktop.csproj" />
+  <Project Path="tools/SmartTimetable.LicenseGenerator/SmartTimetable.LicenseGenerator.csproj" />
+  <Project Path="tests/SmartTimetable.Tests/SmartTimetable.Tests.csproj" />
+</Solution>

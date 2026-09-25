@@ -1,0 +1,26 @@
+<Project>
+
+  <!-- Common settings shared by every project in the solution -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Company>SmartTimetable AI</Company>
+    <Authors>itsmrsarfaraz</Authors>
+    <Product>SmartTimetable AI</Product>
+    <Version>1.0.0</Version>
+    <NoWarn>$(NoWarn);CS1591;NU1603;NU1608</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    NU1903 / CVE-2025-6965 in the bundled native SQLite (SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11, no fixed package yet).
+    Exploiting it needs attacker-controlled SQL; this app is a local single-admin desktop tool and only runs
+    EF Core parameterised queries. Suppressed deliberately - REMOVE this entry once a fixed package ships.
+  -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+
+</Project>

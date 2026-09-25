@@ -1,0 +1,223 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.TimetableView"
+             x:CompileBindings="False">
+
+    <Grid Margin="32" RowDefinitions="Auto,Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Text="{Binding Title}" Classes="h1" />
+            <TextBlock Text="{Binding Description}" Classes="muted" />
+            <TextBlock Classes="muted" FontSize="12" IsVisible="{Binding HasTimetable}"
+                       Text="To move or reassign a lesson, switch off Grid view and click it in the list below." />
+        </StackPanel>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Classes="card" Margin="0,0,0,16" Padding="16">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding HeaderName}" FontWeight="SemiBold" FontSize="16" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="{Binding Strategy}" Classes="muted" FontSize="12" />
+                            <TextBlock Text="{Binding Score, StringFormat='Score: {0}'}" Classes="muted" FontSize="12" />
+                            <Border Background="#DCFCE7" CornerRadius="6" Padding="8,2"
+                                    IsVisible="{Binding IsSelected}">
+                                <TextBlock Text="Kept" Foreground="#166534" FontSize="12" FontWeight="SemiBold" />
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4" Width="220" IsVisible="{Binding HasTimetable}">
+                        <TextBlock Text="Filter by class" FontSize="12" Classes="muted" />
+                        <ComboBox ItemsSource="{Binding Classes}"
+                                  SelectedItem="{Binding SelectedClassFilter}"
+                                  HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <ToggleButton Content="Grid view" IsChecked="{Binding ShowGrid}"
+                                  IsVisible="{Binding HasTimetable}" />
+                    <Button Content="Keep this one" Classes="primary"
+                            Command="{Binding KeepCommand}"
+                            IsVisible="{Binding HasTimetable}" />
+                    <Button Content="Export CSV" Classes="ghost"
+                            Command="{Binding ExportCsvCommand}"
+                            IsVisible="{Binding HasTimetable}" />
+                    <Button Content="Export PDF" Classes="ghost"
+                            Command="{Binding ExportPdfCommand}"
+                            IsVisible="{Binding HasTimetable}" />
+                    <Button Content="Export Excel" Classes="ghost"
+                            Command="{Binding ExportExcelCommand}"
+                            IsVisible="{Binding HasTimetable}" />
+                    <Button Content="Print" Classes="secondary"
+                            Command="{Binding PrintCommand}"
+                            IsVisible="{Binding HasTimetable}" />
+                </StackPanel>
+            </Grid>
+
+                <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap"
+                           IsVisible="{Binding ShowToolbarStatus}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Grid -->
+        <Border Grid.Row="2" Classes="card" Padding="0">
+            <Grid ColumnDefinitions="*,Auto">
+
+                <!-- Both views live here; hidden together when there is no timetable. -->
+                <Panel Grid.Column="0" IsVisible="{Binding HasTimetable}">
+
+                    <!-- Day × period matrix -->
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                  IsVisible="{Binding ShowGrid}" Padding="12">
+                        <StackPanel>
+                            <!-- Header row: corner + one cell per day -->
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="150" Height="40" Background="#F1F5F9"
+                                        BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <TextBlock Text="Period" FontWeight="SemiBold" Margin="10,0"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <ItemsControl ItemsSource="{Binding GridDays}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Width="170" Height="40" Background="#F1F5F9"
+                                                    BorderBrush="#E2E8F0" BorderThickness="1">
+                                                <TextBlock Text="{Binding}" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Period rows -->
+                            <ItemsControl ItemsSource="{Binding GridRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="150" MinHeight="66" Background="#F8FAFC"
+                                                    BorderBrush="#E2E8F0" BorderThickness="1" Padding="10,6">
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding PeriodLabel}" FontWeight="SemiBold" FontSize="12" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding TimeLabel}" Classes="muted" FontSize="11" />
+                                                </StackPanel>
+                                            </Border>
+                                            <ItemsControl ItemsSource="{Binding Cells}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="170" MinHeight="66" BorderBrush="#E2E8F0" BorderThickness="1" Padding="8,6">
+                                                            <TextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Flat list -->
+                    <DataGrid ItemsSource="{Binding Cells}"
+                              SelectedItem="{Binding SelectedCell}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              HeadersVisibility="Column"
+                              IsVisible="{Binding !ShowGrid}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Day" Binding="{Binding Day}" Width="120" />
+                            <DataGridTextColumn Header="Period" Binding="{Binding Period}" Width="130" />
+                            <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="130" />
+                            <DataGridTextColumn Header="Class" Binding="{Binding ClassName}" Width="*" />
+                            <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*" />
+                            <DataGridTextColumn Header="Teacher" Binding="{Binding Teacher}" Width="*" />
+                            <DataGridTextColumn Header="Room" Binding="{Binding Room}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Panel>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Status}"
+                           Classes="muted"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="420"
+                           TextAlignment="Center"
+                           IsVisible="{Binding !HasTimetable}" />
+
+                <!-- Manual-edit panel: appears when a lesson is selected in the list view -->
+                <Border Grid.Column="1" Width="340"
+                        BorderBrush="#E2E8F0" BorderThickness="1,0,0,0"
+                        Background="#F8FAFC" Padding="18"
+                        IsVisible="{Binding SelectedCell, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Edit lesson" Classes="h3" />
+                                <TextBlock Text="{Binding EditLessonHeader}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Day" FontSize="12" />
+                                <ComboBox ItemsSource="{Binding EditableDays}"
+                                          SelectedItem="{Binding EditDay}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Period" FontSize="12" />
+                                <ComboBox ItemsSource="{Binding EditablePeriods}"
+                                          SelectedItem="{Binding EditPeriod}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Teacher" FontSize="12" />
+                                <ComboBox ItemsSource="{Binding EditableTeachers}"
+                                          SelectedItem="{Binding EditTeacher}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Room" FontSize="12" />
+                                <ComboBox ItemsSource="{Binding EditableRooms}"
+                                          SelectedItem="{Binding EditRoom}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <Border Classes="banner" Classes.error="{Binding EditStatusIsError}"
+                                    IsVisible="{Binding EditStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <TextBlock Text="{Binding EditStatus}" TextWrapping="Wrap" />
+                            </Border>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                <Button Content="Save" Classes="primary" Command="{Binding SaveEditCommand}" />
+                                <Button Content="Cancel" Classes="ghost" Command="{Binding CancelEditCommand}" />
+                            </StackPanel>
+                            <Button Content="Delete lesson" Classes="danger"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding DeleteEntryCommand}" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmartTimetable.Desktop.Views.LoginView"
+             x:CompileBindings="False"
+             Background="#F8FAFC">
+
+    <Grid>
+        <Border Classes="card"
+                Width="440"
+                Padding="36"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="16">
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding Title}" Classes="h1" />
+                    <TextBlock Text="{Binding Subtitle}" Classes="muted" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsFirstRun}">
+                    <TextBlock Text="Display name" />
+                    <TextBox Text="{Binding DisplayName}" Watermark="e.g. Principal" />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Username" />
+                    <TextBox Text="{Binding Username}" Watermark="Username" />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Password" />
+                    <TextBox Text="{Binding Password}" PasswordChar="•" Watermark="Password" />
+                </StackPanel>
+
+                <Button Content="{Binding ActionText}"
+                        Classes="primary"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        IsEnabled="{Binding !IsBusy}"
+                        Command="{Binding SubmitCommand}" />
+
+                <TextBlock Text="{Binding StatusMessage}"
+                           TextWrapping="Wrap"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           Foreground="#DC2626" />
+
+                <TextBlock Text="Product by Crafting Colons"
+                           Classes="muted"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0" />
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
