@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 
 namespace SmartTimetable.Desktop.Converters;
@@ -37,6 +38,9 @@ public sealed class AllowedDaysDisplayConverter : IValueConverter
         return string.Join(", ", parts);
     }
 
+    // Display-only converter. A DataGridTextColumn binding is TwoWay by default, so Avalonia
+    // may invoke ConvertBack even for a read-only cell — return the "skip this write" sentinel
+    // instead of throwing, which would otherwise bubble up as an unhandled crash.
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
+        => BindingOperations.DoNothing;
 }

@@ -111,7 +111,7 @@
                                     <DataGridTextColumn Header="Subject" Binding="{Binding Subject.Name}" Width="*" />
                                     <DataGridTextColumn Header="Periods/wk" Binding="{Binding PeriodsPerWeek}" Width="80" />
                                     <DataGridTextColumn Header="Days"
-                                                        Binding="{Binding AllowedDaysCsv, Converter={x:Static conv:AllowedDaysDisplayConverter.Instance}}"
+                                                        Binding="{Binding AllowedDaysCsv, Mode=OneWay, Converter={x:Static conv:AllowedDaysDisplayConverter.Instance}}"
                                                         Width="110" />
                                     <DataGridTextColumn Header="Teacher" Binding="{Binding PreferredTeacher.FullName}" Width="120" />
                                 </DataGrid.Columns>
