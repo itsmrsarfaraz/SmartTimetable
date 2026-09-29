@@ -40,6 +40,15 @@ public class ClassSubject : Entity
     /// <summary>Optional specific day pinned for this lecture demand.</summary>
     public Weekday? PinnedDay { get; set; }
 
+    /// <summary>
+    /// Weekdays this subject is allowed to be scheduled on, as a comma-separated list of
+    /// <see cref="Weekday"/> ints (1=Mon .. 6=Sat), mirroring
+    /// <c>AcademicSession.WorkingDaysCsv</c>. Empty means "no restriction" — the subject may
+    /// use any of the session's working days. Use this to split a class's subjects across the
+    /// week, e.g. Course A on Mon–Wed and Course B on Thu–Sat.
+    /// </summary>
+    public string AllowedDaysCsv { get; set; } = string.Empty;
+
     /// <summary>Optional specific period pinned for this lecture demand.</summary>
     public int? PinnedPeriodId { get; set; }
     public Period? PinnedPeriod { get; set; }

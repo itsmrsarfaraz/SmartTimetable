@@ -67,6 +67,13 @@ public sealed class SolverRequirement
     public int? PinnedDay { get; set; }
     public int? PinnedPeriodId { get; set; }
 
+    /// <summary>
+    /// Weekdays this requirement may be scheduled on (already intersected with the session's
+    /// working days). Empty = no restriction (any working day). Used to confine a subject to
+    /// part of the week, e.g. Course A on Mon–Wed and Course B on Thu–Sat.
+    /// </summary>
+    public List<int> AllowedDays { get; set; } = new();
+
     /// <summary>Periods the assigned teacher prefers for this lecture (soft). Empty = no preference.</summary>
     public List<int> PreferredPeriodIds { get; set; } = new();
 

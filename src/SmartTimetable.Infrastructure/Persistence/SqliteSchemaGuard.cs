@@ -28,6 +28,10 @@ internal static class SqliteSchemaGuard
     {
         // Added with the daily teacher-cap feature. Default 6 ≈ a permanent teacher's day.
         ("Teachers", "MaxPeriodsPerDay", "INTEGER NOT NULL DEFAULT 6"),
+
+        // Added with the day-specific subject scheduling feature. Empty = no restriction
+        // (subject may use any of the session's working days).
+        ("ClassSubjects", "AllowedDaysCsv", "TEXT NOT NULL DEFAULT ''"),
     };
 
     public static void Apply(DbContext db)

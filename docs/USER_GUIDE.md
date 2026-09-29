@@ -205,8 +205,16 @@ subjects. You cannot do the second before the first.
 7. Choose a **Subject**, set **Periods / week**, and pick a **Preferred teacher** —
    this is how you assign a teacher to the class. Leave it on *"(any eligible
    teacher)"* to let the solver choose from qualified staff.
-8. Click **Add / update subject**. The row appears in the subjects table.
-9. Repeat step 7–8 for every subject the class studies.
+8. *(Optional)* Under **Days this subject may be taught**, tick the specific weekdays
+   this subject is allowed on. Leave every box unticked to allow any working day
+   (the normal case). Ticking a subset confines the subject to those days — this is
+   how you split a class's courses across the week: e.g. give Course A three periods
+   on Mon–Wed and Course B three periods on Thu–Sat by setting each subject's days
+   accordingly. The **Days** column in the subjects table shows the current setting
+   ("All days" when unrestricted).
+9. Click **Add / update subject**. The row appears in the subjects table.
+10. Repeat steps 7–9 for every subject the class studies. To change a subject later,
+    click its row: its periods, teacher and days load back into the editor.
 
 That's it — the class now has its full weekly demand, with teachers assigned.
 
@@ -247,6 +255,11 @@ Add the qualification there, reopen the class, and they'll be selectable.
 and mark one session as **active** (or add one and activate it). Alternatively, restart
 the app so the sample data — which includes the active 2026–2027 session — is created.
 See section 8.
+
+**Generate says a subject "needs N periods a week but is limited to X day(s)."** You
+restricted that subject to too few days on the *Classes* screen to fit all its weekly
+periods. Each allowed day holds only as many lessons as there are teaching periods, so
+either tick more days for the subject or lower its **Periods / week**.
 
 If you have checked all of the above and a button still does nothing, note exactly
 which button and what (if any) grey text appears, and report it — that pins down the

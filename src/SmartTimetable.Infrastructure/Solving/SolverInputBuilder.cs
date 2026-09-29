@@ -141,6 +141,7 @@ public sealed class SolverInputBuilder : ISolverInputBuilder
                 TimePreference = cs.TimePreference,
                 PinnedDay = cs.PinnedDay is { } d ? (int)d : null,
                 PinnedPeriodId = cs.PinnedPeriodId,
+                AllowedDays = ParseAllowedDays(cs.AllowedDaysCsv, input.Days),
                 PreferredPeriodIds = cs.PreferredPeriods.Select(pp => pp.PeriodId).ToList(),
                 PreferencePriority = cs.PreferencePriority
             });
@@ -224,5 +225,28 @@ public sealed class SolverInputBuilder : ISolverInputBuilder
 
         days.Sort();
         return days.Count > 0 ? days : new List<int> { 1, 2, 3, 4, 5, 6 };
+    }
+
+    /// <summary>
+    /// Parses a class-subject's allowed-days CSV and intersects it with the session's working
+    /// days. Returns an empty list — meaning "no restriction, use any working day" — when the
+    /// CSV is blank, or when none of the chosen days are working days (nothing valid to confine
+    /// to, so we leave the subject freely schedulable rather than impossible from stale config).
+    /// </summary>
+    private static List<int> ParseAllowedDays(string? csv, List<int> workingDays)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+            return new List<int>(); // no restriction
+
+        var working = workingDays.ToHashSet();
+        var days = new List<int>();
+        foreach (var token in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (int.TryParse(token, out int value) && working.Contains(value) && !days.Contains(value))
+                days.Add(value);
+        }
+
+        days.Sort();
+        return days; // may be empty → treated as "no restriction" by the solver
     }
 }

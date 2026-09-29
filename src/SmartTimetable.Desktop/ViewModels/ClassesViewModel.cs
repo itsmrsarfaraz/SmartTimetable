@@ -17,6 +17,7 @@ namespace SmartTimetable.Desktop.ViewModels;
 public partial class ClassesViewModel : PageViewModel
 {
     private readonly Func<IUnitOfWork> _uow;
+    private readonly AppState _state;
 
     public override string Title => "Classes";
     public override string Description => "Class sections and the weekly subject demand the solver must satisfy.";
@@ -32,10 +33,20 @@ public partial class ClassesViewModel : PageViewModel
     public ObservableCollection<Teacher> Teachers { get; } = new();
     public ObservableCollection<ClassSubject> Demands { get; } = new();
 
+    /// <summary>
+    /// Per-subject weekday checkboxes for the demand editor. Ticking a subset confines the
+    /// subject to those days (so a class's courses can be split across the week); leaving all
+    /// unticked means "any working day". Only the active session's working days are offered.
+    /// </summary>
+    public ObservableCollection<DayToggle> DemandDays { get; } = new();
+
     private Dictionary<int, Subject> _subjectById = new();
     private Dictionary<int, Teacher> _teacherById = new();
     private Dictionary<int, Room> _roomById = new();
     private Dictionary<int, AcademicProgram> _programById = new();
+
+    /// <summary>The active session's working days (Weekday ints, 1=Mon..6=Sat); the only days offered per subject.</summary>
+    private List<int> _workingDays = new() { 1, 2, 3, 4, 5, 6 };
 
     [ObservableProperty] private SchoolClass? _selected;
     [ObservableProperty] private int _editingId;
@@ -56,7 +67,11 @@ public partial class ClassesViewModel : PageViewModel
     [ObservableProperty] private string _demandStatus = string.Empty;
     [ObservableProperty] private bool _demandStatusIsError;
 
-    public ClassesViewModel(Func<IUnitOfWork> uow) => _uow = uow;
+    public ClassesViewModel(Func<IUnitOfWork> uow, AppState state)
+    {
+        _uow = uow;
+        _state = state;
+    }
 
     public string FormTitle => EditingId == 0 ? "Add class" : "Edit class";
 
@@ -87,6 +102,11 @@ public partial class ClassesViewModel : PageViewModel
         var subjects = await uow.Subjects.ListAsync();
         var teachers = await uow.Teachers.ListAsync();
         var classes = await uow.Classes.ListAsync();
+
+        // Only offer the active session's working days per subject, so the admin can't pin a
+        // subject to a day the college doesn't teach. Falls back to Mon–Sat if none is set.
+        var session = _state.ActiveSessionId != 0 ? await uow.Sessions.GetByIdAsync(_state.ActiveSessionId) : null;
+        _workingDays = ParseWorkingDays(session?.WorkingDaysCsv);
 
         _programById = programs.ToDictionary(p => p.Id);
         _roomById = rooms.ToDictionary(r => r.Id);
@@ -129,7 +149,21 @@ public partial class ClassesViewModel : PageViewModel
         SelectedHomeRoom = value.HomeRoomId is int rid && _roomById.TryGetValue(rid, out var r) ? r : NoRoom;
         Status = string.Empty;
         DemandStatus = string.Empty;
+        BuildDemandDays(null); // fresh demand editor for the newly selected class
         _ = LoadDemandsAsync(value.Id);
+    }
+
+    /// <summary>
+    /// Load the picked weekly-subject row into the demand editor so its periods, teacher and
+    /// allowed days can be reviewed and changed (re-adding updates the existing row in place).
+    /// </summary>
+    partial void OnSelectedDemandChanged(ClassSubject? value)
+    {
+        if (value is null) return;
+        DemandSubject = _subjectById.TryGetValue(value.SubjectId, out var s) ? s : DemandSubject;
+        DemandPeriods = value.PeriodsPerWeek;
+        DemandTeacher = value.PreferredTeacherId is int tid && _teacherById.TryGetValue(tid, out var t) ? t : AnyTeacher;
+        BuildDemandDays(value.AllowedDaysCsv);
     }
 
     private async Task LoadDemandsAsync(int classId)
@@ -161,6 +195,7 @@ public partial class ClassesViewModel : PageViewModel
         DemandSubject = Subjects.FirstOrDefault();
         DemandTeacher = AnyTeacher;
         DemandPeriods = 5;
+        BuildDemandDays(null);
     }
 
     [RelayCommand]
@@ -278,6 +313,7 @@ public partial class ClassesViewModel : PageViewModel
         if (DemandPeriods <= 0) { DemandFail("Periods per week must be greater than zero."); return; }
 
         int? teacherId = DemandTeacher is null || DemandTeacher.Id == 0 ? null : DemandTeacher.Id;
+        string allowedDaysCsv = ComposeAllowedDaysCsv();
 
         using (var uow = _uow())
         {
@@ -289,6 +325,7 @@ public partial class ClassesViewModel : PageViewModel
                     var e = existing[0];
                     e.PeriodsPerWeek = DemandPeriods;
                     e.PreferredTeacherId = teacherId;
+                    e.AllowedDaysCsv = allowedDaysCsv;
                     uow.ClassSubjects.Update(e);
                 }
                 else
@@ -298,7 +335,8 @@ public partial class ClassesViewModel : PageViewModel
                         SchoolClassId = EditingId,
                         SubjectId = subject.Id,
                         PeriodsPerWeek = DemandPeriods,
-                        PreferredTeacherId = teacherId
+                        PreferredTeacherId = teacherId,
+                        AllowedDaysCsv = allowedDaysCsv
                     });
                 }
                 await uow.SaveChangesAsync();
@@ -311,7 +349,8 @@ public partial class ClassesViewModel : PageViewModel
         }
 
         await LoadDemandsAsync(EditingId);
-        DemandOk($"Saved “{subject.Name}” — {DemandPeriods} period(s)/week.");
+        string daysNote = string.IsNullOrEmpty(allowedDaysCsv) ? "any working day" : DescribeDays(allowedDaysCsv);
+        DemandOk($"Saved “{subject.Name}” — {DemandPeriods} period(s)/week on {daysNote}.");
     }
 
     [RelayCommand]
@@ -340,5 +379,70 @@ public partial class ClassesViewModel : PageViewModel
 
         await LoadDemandsAsync(EditingId);
         DemandOk("Subject removed.");
+    }
+
+    // ===================== Weekday helpers =====================
+
+    // Weekday enum: Sunday=0..Saturday=6. Display order is Mon..Sat then Sun.
+    private static readonly (int Value, string Label)[] WeekOrder =
+    {
+        (1, "Mon"), (2, "Tue"), (3, "Wed"), (4, "Thu"), (5, "Fri"), (6, "Sat"), (0, "Sun"),
+    };
+
+    /// <summary>
+    /// Rebuilds the per-subject weekday checkboxes for the active session's working days, ticking
+    /// the ones listed in <paramref name="csv"/>. Empty/blank csv leaves every box unticked, which
+    /// the app reads as "any working day".
+    /// </summary>
+    private void BuildDemandDays(string? csv)
+    {
+        var on = new HashSet<int>();
+        if (!string.IsNullOrWhiteSpace(csv))
+            foreach (var tok in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                if (int.TryParse(tok, out int v)) on.Add(v);
+
+        var working = _workingDays.ToHashSet();
+        DemandDays.Clear();
+        foreach (var (value, label) in WeekOrder)
+        {
+            if (!working.Contains(value)) continue; // only offer the college's working days
+            DemandDays.Add(new DayToggle { Value = value, Label = label, IsOn = on.Contains(value) });
+        }
+    }
+
+    /// <summary>
+    /// Builds the AllowedDaysCsv from the ticked checkboxes. Returns an empty string when none —
+    /// or all — working days are ticked, since both mean "no restriction" and storing "" keeps the
+    /// solver's "empty = any working day" contract simple.
+    /// </summary>
+    private string ComposeAllowedDaysCsv()
+    {
+        var chosen = DemandDays.Where(d => d.IsOn).Select(d => d.Value).ToList();
+        if (chosen.Count == 0 || chosen.Count == DemandDays.Count) return string.Empty;
+        return string.Join(",", chosen);
+    }
+
+    /// <summary>Formats an AllowedDaysCsv into a short label like "Mon, Tue, Wed" for status text.</summary>
+    private static string DescribeDays(string csv)
+    {
+        var on = new HashSet<int>();
+        foreach (var tok in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            if (int.TryParse(tok, out int v)) on.Add(v);
+        var parts = WeekOrder.Where(d => on.Contains(d.Value)).Select(d => d.Label);
+        return string.Join(", ", parts);
+    }
+
+    private static List<int> ParseWorkingDays(string? csv)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+            return new List<int> { 1, 2, 3, 4, 5, 6 }; // Mon-Sat default
+
+        var days = new List<int>();
+        foreach (var tok in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            if (int.TryParse(tok, out int v) && v is >= 0 and <= 6 && !days.Contains(v))
+                days.Add(v);
+
+        days.Sort();
+        return days.Count > 0 ? days : new List<int> { 1, 2, 3, 4, 5, 6 };
     }
 }

@@ -69,6 +69,27 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
             }
         }
 
+        // Pre-flight: a day-restricted subject that needs more lessons than its allowed
+        // days can hold (allowed days × teaching periods per day) can never be placed, so
+        // report it clearly rather than letting the solver return an opaque infeasible.
+        int teachingPeriodCount = input.Periods.Count(p => !p.IsBreak);
+        foreach (var r in input.Requirements)
+        {
+            if (r.AllowedDays.Count == 0) continue; // unrestricted — no day limit to check
+            int capacity = r.AllowedDays.Count * teachingPeriodCount;
+            if (r.PeriodsPerWeek > capacity)
+            {
+                string cls = classById.TryGetValue(r.ClassId, out var c) ? c.Name : $"Class {r.ClassId}";
+                string sub = subjectById.TryGetValue(r.SubjectId, out var s) ? s.Name : $"Subject {r.SubjectId}";
+                string msg = $"{sub} for {cls} needs {r.PeriodsPerWeek} periods a week but is limited to " +
+                             $"{r.AllowedDays.Count} day(s), which hold only {capacity} teaching slot(s). " +
+                             "Allow more days for this subject or reduce its periods per week.";
+                foreach (var strat in strategies)
+                    results.Add(new SolverSolution { Strategy = strat, IsFeasible = false, Score = 0, StatusText = msg });
+                return results;
+            }
+        }
+
         var allowedSlots = new HashSet<(int, int, int)>();
         foreach (var a in input.AllowedSlots)
             allowedSlots.Add((a.TeacherId, a.Day, a.PeriodId));
@@ -155,9 +176,16 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
             }
             model.Add(LinearExpr.Sum(teachVars.ToArray()) == 1);
 
-            // place[r,d,p]; exactly n placed, capped per day for spread.
+            // place[r,d,p]; exactly n placed, capped per day for spread. When the demand
+            // is confined to specific weekdays (AllowedDays), lessons may only land on
+            // those days — vars for other days are still created (so the teacher-occupancy
+            // y, combined-class and pairing constraints below can reference every day) but
+            // forced to 0. The per-day cap is computed over the schedulable-day count, so a
+            // subject squeezed into fewer days can still fit its full weekly total.
             var placeVars = new List<IntVar>(days.Count * teachingPeriods.Count);
-            int perDayCap = (int)Math.Ceiling(req.PeriodsPerWeek / (double)Math.Max(1, days.Count));
+            var allowedDaySet = req.AllowedDays.Count > 0 ? new HashSet<int>(req.AllowedDays) : null;
+            int schedulableDays = allowedDaySet is null ? days.Count : days.Count(d => allowedDaySet.Contains(d));
+            int perDayCap = (int)Math.Ceiling(req.PeriodsPerWeek / (double)Math.Max(1, schedulableDays));
 
             // Preferred periods this demand's teacher asked for (soft). Null = no preference.
             var preferredSet = req.PreferencePriority > 0 && req.PreferredPeriodIds.Count > 0
@@ -167,11 +195,21 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
 
             foreach (var d in days)
             {
+                bool dayAllowed = allowedDaySet is null || allowedDaySet.Contains(d);
                 var perDay = new List<IntVar>(teachingPeriods.Count);
                 foreach (var p in teachingPeriods)
                 {
                     var pv = model.NewBoolVar($"place_r{ri}_d{d}_p{p.Id}");
                     place[(ri, d, p.Id)] = pv;
+
+                    // Subject not offered on this weekday: pin to 0 and skip its buckets and
+                    // penalties (a var fixed at 0 contributes nothing to them anyway).
+                    if (!dayAllowed)
+                    {
+                        model.Add(pv == 0);
+                        continue;
+                    }
+
                     placeVars.Add(pv);
                     perDay.Add(pv);
 
@@ -197,7 +235,8 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
                     if (preferredSet is not null && !preferredSet.Contains(p.Id))
                         AddPenalty(pv, periodPrefWeight);
                 }
-                model.Add(LinearExpr.Sum(perDay.ToArray()) <= perDayCap);
+                if (perDay.Count > 0)
+                    model.Add(LinearExpr.Sum(perDay.ToArray()) <= perDayCap);
             }
             model.Add(LinearExpr.Sum(placeVars.ToArray()) == req.PeriodsPerWeek);
 
