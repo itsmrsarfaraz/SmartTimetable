@@ -33,3 +33,9 @@ Thumbs.db
 ## Issued customer licenses + vendor tracking log (never commit)
 *.lic
 issued_licenses*.csv
+
+*.exe
+
+MasterPrompt.md
+*pem
+vendor_public.txt
