@@ -38,7 +38,7 @@
                         <Button Content="Classes"            Classes="nav" Command="{Binding NavigateClassesCommand}" />
                         <Button Content="Combined Classes"   Classes="nav" Command="{Binding NavigateCombinedCommand}" />
                         <Button Content="Contradictory Subjects" Classes="nav" Command="{Binding NavigateContradictionsCommand}" />
-                        <Button Content="Subject Pairing"     Classes="nav" Command="{Binding NavigatePairingCommand}" />
+                        <Button Content="Parallel Electives"  Classes="nav" Command="{Binding NavigatePairingCommand}" />
                         <Button Content="Teacher Subjects"   Classes="nav" Command="{Binding NavigateMappingCommand}" />
                         <Button Content="Teacher Periods"    Classes="nav" Command="{Binding NavigateTeacherPeriodsCommand}" />
                         <Button Content="Teacher Availability" Classes="nav" Command="{Binding NavigateAvailabilityCommand}" />

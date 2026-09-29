@@ -104,6 +104,7 @@ public sealed class SolverInputBuilder : ISolverInputBuilder
                 IsVisiting = t.Type == TeacherType.Visiting,
                 MinPeriods = t.MinWeeklyPeriods,
                 MaxPeriods = t.MaxWeeklyPeriods,
+                MaxPerDay = t.MaxPeriodsPerDay,
                 HasAvailabilityRestriction = t.Availabilities.Count > 0
             });
         }

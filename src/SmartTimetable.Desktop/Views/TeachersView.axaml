@@ -22,8 +22,9 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Binding="{Binding FullName}" Width="*" />
                         <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" />
-                        <DataGridTextColumn Header="Min" Binding="{Binding MinWeeklyPeriods}" Width="60" />
-                        <DataGridTextColumn Header="Max" Binding="{Binding MaxWeeklyPeriods}" Width="60" />
+                        <DataGridTextColumn Header="/ day" Binding="{Binding MaxPeriodsPerDay}" Width="55" />
+                        <DataGridTextColumn Header="Min" Binding="{Binding MinWeeklyPeriods}" Width="55" />
+                        <DataGridTextColumn Header="Max" Binding="{Binding MaxWeeklyPeriods}" Width="55" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -64,9 +65,15 @@
                             <ComboBox ItemsSource="{Binding TeacherTypes}"
                                       SelectedItem="{Binding Type}"
                                       HorizontalAlignment="Stretch" />
+                            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                                       Text="Choosing a type suggests its usual caps (permanent ≈ 6/day, visiting 1/day). You can still edit them below." />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel Spacing="6" Width="100">
+                                <TextBlock Text="Max / day" />
+                                <NumericUpDown Value="{Binding MaxPeriodsPerDay}" Minimum="1" Maximum="12" Increment="1" FormatString="0" />
+                            </StackPanel>
                             <StackPanel Spacing="6" Width="100">
                                 <TextBlock Text="Min / week" />
                                 <NumericUpDown Value="{Binding MinWeeklyPeriods}" Minimum="0" Maximum="60" Increment="1" FormatString="0" />

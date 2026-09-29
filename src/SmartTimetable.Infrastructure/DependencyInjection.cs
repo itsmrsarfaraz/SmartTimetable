@@ -59,6 +59,9 @@ public static class DependencyInjection
         var factory = provider.GetRequiredService<IDbContextFactory<AppDbContext>>();
         using var db = factory.CreateDbContext();
         db.Database.EnsureCreated();
+        // EnsureCreated never alters an existing table, so patch in any columns added by
+        // later versions before we seed or query — keeps upgrading users' data intact.
+        SqliteSchemaGuard.Apply(db);
         DatabaseSeeder.Seed(db);
     }
 }

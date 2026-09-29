@@ -20,7 +20,7 @@ public partial class TeachersViewModel : PageViewModel
     private readonly Func<IUnitOfWork> _uow;
 
     public override string Title => "Teachers";
-    public override string Description => "Teaching staff, employment type and weekly workload limits.";
+    public override string Description => "Teaching staff, employment type and daily/weekly workload limits.";
 
     public ObservableCollection<Teacher> Items { get; } = new();
 
@@ -34,15 +34,40 @@ public partial class TeachersViewModel : PageViewModel
     [ObservableProperty] private string _phone = string.Empty;
     [ObservableProperty] private string _email = string.Empty;
     [ObservableProperty] private TeacherType _type = TeacherType.Permanent;
+    [ObservableProperty] private int _maxPeriodsPerDay = 6;
     [ObservableProperty] private int _minWeeklyPeriods;
-    [ObservableProperty] private int _maxWeeklyPeriods = 30;
+    [ObservableProperty] private int _maxWeeklyPeriods = 42;
     [ObservableProperty] private string _status = string.Empty;
+
+    // While loading a teacher into the form we assign Type directly; that must NOT
+    // overwrite the loaded caps with the type's suggested defaults.
+    private bool _suppressTypeDefaults;
 
     public TeachersViewModel(Func<IUnitOfWork> uow) => _uow = uow;
 
     public string FormTitle => EditingId == 0 ? "Add teacher" : "Edit teacher";
 
     partial void OnEditingIdChanged(int value) => OnPropertyChanged(nameof(FormTitle));
+
+    /// <summary>
+    /// When the admin picks an employment type, pre-fill the caps the way a college
+    /// runs them: a permanent teacher ~6 periods/day (≈42/week), a visiting teacher
+    /// 1/day (≈6/week). These are only starting points — the admin can still edit them.
+    /// </summary>
+    partial void OnTypeChanged(TeacherType value)
+    {
+        if (_suppressTypeDefaults) return;
+        if (value == TeacherType.Visiting)
+        {
+            MaxPeriodsPerDay = 1;
+            MaxWeeklyPeriods = 6;
+        }
+        else
+        {
+            MaxPeriodsPerDay = 6;
+            MaxWeeklyPeriods = 42;
+        }
+    }
 
     public override async Task LoadAsync()
     {
@@ -56,6 +81,7 @@ public partial class TeachersViewModel : PageViewModel
     partial void OnSelectedChanged(Teacher? value)
     {
         if (value is null) return;
+        _suppressTypeDefaults = true;
         EditingId = value.Id;
         FullName = value.FullName;
         Cnic = value.Cnic;
@@ -63,13 +89,16 @@ public partial class TeachersViewModel : PageViewModel
         Phone = value.Phone;
         Email = value.Email;
         Type = value.Type;
+        MaxPeriodsPerDay = value.MaxPeriodsPerDay;
         MinWeeklyPeriods = value.MinWeeklyPeriods;
         MaxWeeklyPeriods = value.MaxWeeklyPeriods;
         Status = string.Empty;
+        _suppressTypeDefaults = false;
     }
 
     private void ResetForm()
     {
+        _suppressTypeDefaults = true;
         Selected = null;
         EditingId = 0;
         FullName = string.Empty;
@@ -78,8 +107,10 @@ public partial class TeachersViewModel : PageViewModel
         Phone = string.Empty;
         Email = string.Empty;
         Type = TeacherType.Permanent;
+        MaxPeriodsPerDay = 6;
         MinWeeklyPeriods = 0;
-        MaxWeeklyPeriods = 30;
+        MaxWeeklyPeriods = 42;
+        _suppressTypeDefaults = false;
     }
 
     [RelayCommand]
@@ -102,6 +133,11 @@ public partial class TeachersViewModel : PageViewModel
             Status = "Maximum weekly periods must be greater than zero.";
             return;
         }
+        if (MaxPeriodsPerDay <= 0)
+        {
+            Status = "Maximum periods per day must be greater than zero.";
+            return;
+        }
         if (MinWeeklyPeriods < 0 || MinWeeklyPeriods > MaxWeeklyPeriods)
         {
             Status = "Minimum weekly periods must be between 0 and the maximum.";
@@ -121,6 +157,7 @@ public partial class TeachersViewModel : PageViewModel
                     Phone = Phone.Trim(),
                     Email = Email.Trim(),
                     Type = Type,
+                    MaxPeriodsPerDay = MaxPeriodsPerDay,
                     MinWeeklyPeriods = MinWeeklyPeriods,
                     MaxWeeklyPeriods = MaxWeeklyPeriods
                 });
@@ -135,6 +172,7 @@ public partial class TeachersViewModel : PageViewModel
                 e.Phone = Phone.Trim();
                 e.Email = Email.Trim();
                 e.Type = Type;
+                e.MaxPeriodsPerDay = MaxPeriodsPerDay;
                 e.MinWeeklyPeriods = MinWeeklyPeriods;
                 e.MaxWeeklyPeriods = MaxWeeklyPeriods;
                 uow.Teachers.Update(e);

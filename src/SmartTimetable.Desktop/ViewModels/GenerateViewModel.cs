@@ -49,6 +49,18 @@ public partial class GenerateViewModel : PageViewModel
     [ObservableProperty] private string _status = string.Empty;
     [ObservableProperty] private bool _hasResults;
 
+    /// <summary>
+    /// True when a run has finished but produced no rows at all (a guard rail stopped it,
+    /// or it threw). In that case the results grid is empty, so the view shows a large,
+    /// centred message with <see cref="Status"/> instead of a blank panel — otherwise the
+    /// only explanation sits in small text on the left and reads as "nothing happened".
+    /// </summary>
+    public bool ShowEmptyState => !IsBusy && !HasResults && !string.IsNullOrEmpty(Status);
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(ShowEmptyState));
+    partial void OnHasResultsChanged(bool value) => OnPropertyChanged(nameof(ShowEmptyState));
+    partial void OnStatusChanged(string value) => OnPropertyChanged(nameof(ShowEmptyState));
+
     // ----- Custom-strategy weights (0 disables that objective) -----
     [ObservableProperty] private int _weightTeacherPref = 2;
     [ObservableProperty] private int _weightLastPeriod = 2;
@@ -131,7 +143,10 @@ public partial class GenerateViewModel : PageViewModel
         }
         catch (Exception ex)
         {
-            Status = "Generation failed: " + ex.Message;
+            // Surface the innermost message — EF wraps the useful text (e.g. a missing
+            // column from an older database) inside an outer exception.
+            var detail = ex.InnerException?.Message ?? ex.Message;
+            Status = "Generation failed: " + detail;
         }
         finally
         {
@@ -149,6 +164,19 @@ public partial class GenerateViewModel : PageViewModel
     private void Open(TimetableOptionSummary? option)
     {
         if (option is null) return;
+
+        // Infeasible strategies are still listed (so the admin can see the solver tried
+        // them) but they were never saved, so there is nothing to open. Firing the open
+        // event here would land on the timetable screen's "No timetable yet" message and
+        // read as if the whole feature were broken. Explain it in place instead.
+        if (!option.IsFeasible || option.TimetableId == 0)
+        {
+            Status = $"“{option.Name}” has no timetable to open — the solver could not fit " +
+                     "every lesson for that strategy. Try another option that produced a result, " +
+                     "or adjust the inputs and generate again.";
+            return;
+        }
+
         OpenTimetableRequested?.Invoke(option.TimetableId);
     }
 }

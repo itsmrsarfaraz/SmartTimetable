@@ -105,7 +105,11 @@ internal static class Cli
         var request = Require(o, "request");
         var customer = Require(o, "customer");
         var edition = o.GetValueOrDefault("edition", "Standard");
-        var folder = o.GetValueOrDefault("out", ".");
+        // Default to the vendor's Downloads folder (like CraftingPOS) so the issued key is
+        // easy to find and send; --out overrides. Falls back to the current directory.
+        var folder = o.TryGetValue("out", out var outFolder) && !string.IsNullOrWhiteSpace(outFolder)
+            ? outFolder
+            : DownloadsFolder();
         var keyPath = o.GetValueOrDefault("key", "vendor_private.pem");
 
         DateTimeOffset? expires = null;
@@ -139,9 +143,10 @@ internal static class Cli
         AppendLog(Path.Combine(folder, "issued_licenses.csv"), issued, request);
 
         Console.WriteLine($"License issued for '{issued.Payload.Customer}' ({(expires is null ? "lifetime" : "expires " + expires.Value.ToString("yyyy-MM-dd"))}).");
-        Console.WriteLine($"License file: {Path.GetFullPath(file)}");
+        Console.WriteLine($"Saved to: {Path.GetFullPath(file)}");
+        Console.WriteLine("Send that .lic file to the college; they import it on the Activation screen to unlock the app on that PC.");
         Console.WriteLine();
-        Console.WriteLine("Or send this single line (customer pastes it into the app):");
+        Console.WriteLine("Or send this single line instead (they paste it into the app):");
         Console.WriteLine(issued.Token);
         return 0;
     }
@@ -199,6 +204,29 @@ internal static class Cli
         return sb.ToString().Trim('-').Replace("--", "-");
     }
 
+    // Resolves the current user's Downloads folder. Windows has no dedicated Environment
+    // special folder for Downloads, so build it from the user profile; if that is not
+    // available (or the folder cannot be reached) fall back to the current directory.
+    private static string DownloadsFolder()
+    {
+        try
+        {
+            var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrEmpty(profile))
+                profile = Environment.GetEnvironmentVariable("USERPROFILE") ?? "";
+            if (!string.IsNullOrEmpty(profile))
+            {
+                var downloads = Path.Combine(profile, "Downloads");
+                if (Directory.Exists(downloads)) return downloads;
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            // fall through to current directory
+        }
+        return ".";
+    }
+
     private static string Require(Dictionary<string, string> o, string name) =>
         o.TryGetValue(name, out var v) && !string.IsNullOrWhiteSpace(v)
             ? v
@@ -249,6 +277,7 @@ internal static class Cli
               issue   --request <code> --customer "<name>" [--edition Standard]
                       [--expires yyyy-MM-dd] [--min-matches N] [--key vendor_private.pem] [--out <folder>]
                       Issue a lifetime license (omit --expires) locked to the requesting PC.
+                      Saves the .lic to your Downloads folder by default; --out overrides.
               verify  --license <file> [--public-key vendor_public.txt]
                       Check a license's signature and show its contents.
 

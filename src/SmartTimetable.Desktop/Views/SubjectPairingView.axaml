@@ -71,7 +71,7 @@
                     </Border>
 
                     <TextBlock Classes="muted" TextWrapping="Wrap"
-                               Text="Pairing is a soft hint. The generator prefers to align the two subjects in the same period but will break the pairing if it has to, to keep the timetable valid." />
+                               Text="This is a soft hint. The generator prefers to place the two subjects in the same period so they run in parallel, but will break the alignment if it has to, to keep the timetable valid." />
                 </StackPanel>
             </Border>
 

@@ -58,7 +58,7 @@
 										<NumericUpDown Value="{Binding WeightPeriodPref}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
 									</StackPanel>
 									<StackPanel Grid.Row="3" Grid.Column="0" Spacing="4" Margin="0,0,5,0">
-										<TextBlock Text="Subject pairing" FontSize="12" />
+										<TextBlock Text="Parallel electives" FontSize="12" />
 										<NumericUpDown Value="{Binding WeightPairing}" Minimum="0" Maximum="10" Increment="1" FormatString="0" />
 									</StackPanel>
 								</Grid>
@@ -110,33 +110,50 @@
 
             <!-- Results -->
             <Border Grid.Column="1" Classes="card" Padding="0">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Candidate timetables" Classes="h2" Margin="16,16,16,8" />
-                    <DataGrid ItemsSource="{Binding Options}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              GridLinesVisibility="Horizontal"
-                              HeadersVisibility="Column">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                            <DataGridTextColumn Header="Strategy" Binding="{Binding Strategy}" Width="150" />
-                            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="80" />
-                            <DataGridTextColumn Header="Placed" Binding="{Binding PlacedLessons}" Width="80" />
-                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="130" />
-                            <DataGridTemplateColumn Header="" Width="110">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Open"
-                                                Classes="ghost"
-                                                Margin="6,4"
-                                                Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
+                <Panel>
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Candidate timetables" Classes="h2" Margin="16,16,16,8" />
+                        <DataGrid ItemsSource="{Binding Options}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                                <DataGridTextColumn Header="Strategy" Binding="{Binding Strategy}" Width="150" />
+                                <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="80" />
+                                <DataGridTextColumn Header="Placed" Binding="{Binding PlacedLessons}" Width="80" />
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="130" />
+                                <DataGridTemplateColumn Header="" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Open"
+                                                    Classes="ghost"
+                                                    Margin="6,4"
+                                                    Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- Shown only when a run finished with no rows at all: makes the reason
+                         impossible to miss instead of leaving the panel blank. -->
+                    <Border IsVisible="{Binding ShowEmptyState}" Background="White" Padding="32">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    MaxWidth="440" Spacing="10">
+                            <TextBlock Text="No timetable was produced" Classes="h2"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding Status}" Classes="muted" TextWrapping="Wrap"
+                                       HorizontalAlignment="Center" TextAlignment="Center" />
+                            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                       HorizontalAlignment="Center" TextAlignment="Center"
+                                       Text="Common causes: a subject with no qualified teacher mapped, a teacher's daily/weekly cap set too low, or more periods-per-week than the timetable has slots." />
+                        </StackPanel>
+                    </Border>
+                </Panel>
             </Border>
 
         </Grid>

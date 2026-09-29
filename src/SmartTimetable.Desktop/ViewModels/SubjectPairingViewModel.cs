@@ -19,9 +19,9 @@ public partial class SubjectPairingViewModel : PageViewModel
 {
     private readonly Func<IUnitOfWork> _uow;
 
-    public override string Title => "Subject Pairing";
+    public override string Title => "Parallel Electives";
     public override string Description =>
-        "Let two subjects run at the same time. The generator tries to place them in the same period so parallel electives line up.";
+        "Let two subjects run at the same time (parallel electives). The generator tries to place them in the same period so electives across programs line up and can share a slot.";
 
     public ObservableCollection<SubjectPairingRule> Rules { get; } = new();
     public ObservableCollection<Subject> Subjects { get; } = new();
@@ -37,7 +37,7 @@ public partial class SubjectPairingViewModel : PageViewModel
 
     public SubjectPairingViewModel(Func<IUnitOfWork> uow) => _uow = uow;
 
-    public string FormTitle => EditingId == 0 ? "Add pairing" : "Edit pairing";
+    public string FormTitle => EditingId == 0 ? "Add elective pair" : "Edit elective pair";
     partial void OnEditingIdChanged(int value) => OnPropertyChanged(nameof(FormTitle));
 
     private void Ok(string m) { StatusIsError = false; Status = m; }
@@ -108,7 +108,7 @@ public partial class SubjectPairingViewModel : PageViewModel
                     r.Id != EditingId &&
                     ((r.SubjectAId == aId && r.SubjectBId == bId) ||
                      (r.SubjectAId == bId && r.SubjectBId == aId)));
-                if (dupe is not null) { Fail("Those two subjects are already paired."); return; }
+                if (dupe is not null) { Fail("Those two subjects are already set to run in parallel."); return; }
 
                 if (EditingId == 0)
                 {
@@ -120,7 +120,7 @@ public partial class SubjectPairingViewModel : PageViewModel
                 else
                 {
                     var e = await uow.PairingRules.GetByIdAsync(EditingId);
-                    if (e is null) { Fail("This pairing no longer exists."); return; }
+                    if (e is null) { Fail("This rule no longer exists."); return; }
                     e.SubjectAId = aId;
                     e.SubjectBId = bId;
                     uow.PairingRules.Update(e);
@@ -133,13 +133,13 @@ public partial class SubjectPairingViewModel : PageViewModel
 
         await LoadAsync();
         Selected = Rules.FirstOrDefault(r => r.Id == keepId);
-        Ok("Pairing saved. It takes effect the next time you generate a timetable.");
+        Ok("Saved. It takes effect the next time you generate a timetable.");
     }
 
     [RelayCommand]
     private async Task DeleteAsync()
     {
-        if (EditingId == 0) { Fail("Select a pairing to delete."); return; }
+        if (EditingId == 0) { Fail("Select a rule to delete."); return; }
         using (var uow = _uow())
         {
             var e = await uow.PairingRules.GetByIdAsync(EditingId);
@@ -151,6 +151,6 @@ public partial class SubjectPairingViewModel : PageViewModel
             }
         }
         await LoadAsync();
-        Ok("Pairing deleted.");
+        Ok("Deleted.");
     }
 }

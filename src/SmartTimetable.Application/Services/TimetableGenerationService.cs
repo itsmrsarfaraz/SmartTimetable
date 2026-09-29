@@ -35,14 +35,18 @@ public sealed class TimetableGenerationService : ITimetableGenerationService
         if (input.Requirements.Count == 0) { report.Message = "No class-subject requirements are configured."; return report; }
         if (input.Teachers.Count == 0) { report.Message = "No teachers are configured."; return report; }
 
-        int totalCapacity = input.Days.Count * input.Periods.Count;
+        // Only teaching periods can hold a lesson — the daily break is never scheduled,
+        // so it must not count towards a class's weekly capacity.
+        int teachingPeriodsPerDay = input.Periods.Count(p => !p.IsBreak);
+        int totalCapacity = input.Days.Count * teachingPeriodsPerDay;
         foreach (var cls in input.Classes)
         {
             int demand = input.Requirements.Where(r => r.ClassId == cls.Id).Sum(r => r.PeriodsPerWeek);
             if (demand > totalCapacity)
             {
-                report.Message = $"Class '{cls.Name}' needs {demand} periods but only {totalCapacity} weekly slots exist. " +
-                                 "Reduce periods-per-week or add periods/days.";
+                report.Message = $"Class '{cls.Name}' needs {demand} periods per week but only {totalCapacity} teaching slots exist " +
+                                 $"({input.Days.Count} days × {teachingPeriodsPerDay} periods). " +
+                                 "Reduce the periods-per-week on its subjects, or add teaching periods/working days.";
                 return report;
             }
         }
@@ -111,7 +115,9 @@ public sealed class TimetableGenerationService : ITimetableGenerationService
 
         report.Message = report.AnyFeasible
             ? $"Generated {report.Options.Count(o => o.IsFeasible)} timetable option(s)."
-            : "The solver could not satisfy all hard constraints. Review teacher availability, workloads and lab capacity.";
+            : "The solver could not fit every lesson into a conflict-free timetable. " +
+              "Usual fixes: raise a teacher's daily/weekly period cap, map more teachers to busy subjects, " +
+              "widen teacher availability windows, add a lab room, or lower some periods-per-week.";
 
         return report;
     }

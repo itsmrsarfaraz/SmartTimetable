@@ -4,6 +4,12 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SmartTimetable.Desktop</RootNamespace>
+    <!-- Output file name = SmartTimetable.exe (NOT SmartTimetable.Desktop.exe).
+         Everything downstream - publish.bat, build-installer.bat and the Inno
+         Setup script - expects "SmartTimetable.exe". This changes only the file
+         name / assembly identity; namespaces stay SmartTimetable.Desktop, so
+         Avalonia resource loading (avares://) is unaffected. -->
+    <AssemblyName>SmartTimetable</AssemblyName>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationManifest>app.manifest</ApplicationManifest>

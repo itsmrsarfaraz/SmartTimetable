@@ -14,10 +14,10 @@ namespace SmartTimetable.Solver;
 ///
 /// Hard constraints: one teacher per requirement, exact weekly counts, per-day
 /// spread cap, one subject per class-slot, one class per teacher-slot, teacher
-/// availability windows, teacher max workload, lab-room capacity per slot, and
-/// combined-class co-scheduling. Soft goals (last period, afternoon load, teacher
-/// preferences, minimum workload) are penalties; score = 10000 - penalty.
-/// One solution is produced per requested strategy.
+/// availability windows, teacher max workload (weekly ceiling AND per-day cap),
+/// lab-room capacity per slot, and combined-class co-scheduling. Soft goals (last
+/// period, afternoon load, teacher preferences, minimum workload) are penalties;
+/// score = 10000 - penalty. One solution is produced per requested strategy.
 /// </summary>
 public sealed class CpSatTimetableSolver : ITimetableSolver
 {
@@ -130,7 +130,8 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
         // Aggregation buckets for constraints.
         var classSlot = new Dictionary<(int, int, int), List<IntVar>>();     // class no-overlap
         var teacherSlot = new Dictionary<(int, int, int), List<IntVar>>();   // teacher no-overlap
-        var teacherLoad = new Dictionary<int, List<IntVar>>();               // teacher workload
+        var teacherLoad = new Dictionary<int, List<IntVar>>();               // teacher weekly workload
+        var teacherDayLoad = new Dictionary<(int, int), List<IntVar>>();     // teacher per-day workload
         var labSlot = new Dictionary<(int, int), List<IntVar>>();            // lab-room capacity
 
         // Penalty terms for the objective.
@@ -224,6 +225,7 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
 
                         Bucket(teacherSlot, (t, d, p.Id)).Add(yv);
                         Bucket(teacherLoad, t).Add(yv);
+                        Bucket(teacherDayLoad, (t, d)).Add(yv);
                     }
                 }
             }
@@ -262,6 +264,18 @@ public sealed class CpSatTimetableSolver : ITimetableSolver
                 model.Add(under >= t.MinPeriods - load);
                 AddPenalty(under, profile.UnderMin);
             }
+        }
+
+        // Teacher per-day cap (hard): a permanent teacher takes ~6 lessons a day, a
+        // visiting teacher usually 1. This is what stops the solver stacking a whole
+        // week's load onto one teacher's single day, and is the daily counterpart to the
+        // weekly ceiling above. 0/negative means "no daily limit".
+        foreach (var ((teacherId, _), dayVars) in teacherDayLoad)
+        {
+            if (dayVars.Count == 0) continue;
+            var t = input.Teachers.First(x => x.Id == teacherId);
+            if (t.MaxPerDay > 0 && t.MaxPerDay < dayVars.Count)
+                model.Add(LinearExpr.Sum(dayVars.ToArray()) <= t.MaxPerDay);
         }
 
         // Teacher preferences (soft), scaled by the strategy's TeacherPref multiplier.

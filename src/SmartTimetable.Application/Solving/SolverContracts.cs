@@ -27,7 +27,13 @@ public sealed class SolverTeacher
     public string Name { get; set; } = string.Empty;
     public bool IsVisiting { get; set; }
     public int MinPeriods { get; set; }
-    public int MaxPeriods { get; set; } = 30;
+    public int MaxPeriods { get; set; } = 42;
+
+    /// <summary>
+    /// Hard ceiling on lessons this teacher may take on a single day (0 or negative =
+    /// no per-day limit). Visiting staff are usually 1; permanent staff 6–7.
+    /// </summary>
+    public int MaxPerDay { get; set; } = 6;
 
     /// <summary>When true, only slots listed in <see cref="SolverInput.AllowedSlots"/> may be used.</summary>
     public bool HasAvailabilityRestriction { get; set; }

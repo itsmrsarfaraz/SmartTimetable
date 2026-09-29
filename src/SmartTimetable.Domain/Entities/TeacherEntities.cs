@@ -14,11 +14,19 @@ public class Teacher : Entity
 
     public TeacherType Type { get; set; } = TeacherType.Permanent;
 
+    /// <summary>
+    /// Maximum lessons this teacher may take on any single day. This is the cap the
+    /// admin thinks in: a permanent teacher takes ~6 periods a day, a visiting teacher
+    /// typically 1. The solver enforces it as a hard per-day limit, so with a 6-day week
+    /// a permanent teacher tops out near 36 and a visiting teacher near 6.
+    /// </summary>
+    public int MaxPeriodsPerDay { get; set; } = 6;
+
     /// <summary>Minimum weekly teaching periods (workload floor).</summary>
     public int MinWeeklyPeriods { get; set; }
 
     /// <summary>Maximum weekly teaching periods (workload ceiling).</summary>
-    public int MaxWeeklyPeriods { get; set; } = 30;
+    public int MaxWeeklyPeriods { get; set; } = 42;
 
     public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();
     public ICollection<TeacherAvailability> Availabilities { get; set; } = new List<TeacherAvailability>();

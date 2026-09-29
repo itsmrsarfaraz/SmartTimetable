@@ -29,7 +29,7 @@
 ; Paths are relative to THIS script (the installer\ folder).
 #define AppIcon          "..\src\SmartTimetable.Desktop\Assets\timetable.ico"
 #define UninstallIcon    "TimetableDelete.ico"
-#define PublishedExe     "..\publish\SmartTimetable.exe"
+#define PublishDir       "..\publish"
 
 [Setup]
 ; A stable AppId keeps upgrades/uninstall consistent across versions -- do NOT change it.
@@ -68,9 +68,15 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#PublishedExe}";  DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
-Source: "{#AppIcon}";       DestDir: "{app}"; DestName: "timetable.ico";   Flags: ignoreversion
-Source: "{#UninstallIcon}"; DestDir: "{app}"; DestName: "TimetableDelete.ico"; Flags: ignoreversion
+; The ENTIRE self-contained publish output: SmartTimetable.exe PLUS any loose
+; runtime files that sit next to it (e.g. the LatoFont folder QuestPDF uses for
+; PDF export). Packaging the whole folder means the installed app can never be
+; missing a support file, regardless of how the publish layout changes.
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Icons used by the shortcuts and the uninstall entry (kept as explicit copies so
+; they are always present even if the publish output layout changes).
+Source: "{#AppIcon}";       DestDir: "{app}"; DestName: "timetable.ico";        Flags: ignoreversion
+Source: "{#UninstallIcon}"; DestDir: "{app}"; DestName: "TimetableDelete.ico";  Flags: ignoreversion
 
 [Icons]
 ; Start-Menu launch shortcut -> application icon.

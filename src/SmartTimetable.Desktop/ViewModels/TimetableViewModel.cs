@@ -179,71 +179,101 @@ public partial class TimetableViewModel : PageViewModel
         HasTimetable = false;
         Status = string.Empty;
 
-        using var uow = _uow();
-
-        GeneratedTimetable? tt = _requestedId != 0
-            ? await uow.Timetables.GetByIdAsync(_requestedId)
-            : null;
-
-        if (tt is null)
+        try
         {
-            var forSession = await uow.Timetables.ListAsync(t => t.AcademicSessionId == _state.ActiveSessionId);
-            tt = forSession.FirstOrDefault(t => t.IsSelected)
-                 ?? forSession.OrderByDescending(t => t.Id).FirstOrDefault();
-        }
+            using var uow = _uow();
 
-        if (tt is null)
-        {
-            Status = "No timetable yet. Open the Generate screen to create one.";
-            return;
-        }
+            // When a specific timetable was requested (the "Open" button), load exactly
+            // that one. If the id can't be found, say so distinctly rather than silently
+            // falling back to the most-recent one — that masked the real problem before.
+            GeneratedTimetable? tt = _requestedId != 0
+                ? await uow.Timetables.GetByIdAsync(_requestedId)
+                : null;
 
-        _loadedId = tt.Id;
-        HeaderName = tt.Name;
-        Strategy = tt.Strategy.ToString();
-        Score = tt.Score;
-        IsSelected = tt.IsSelected;
-
-        var classes = await uow.Classes.ListAsync();
-        var subjects = await uow.Subjects.ListAsync();
-        var teachers = await uow.Teachers.ListAsync();
-        var rooms = await uow.Rooms.ListAsync();
-        var periods = await uow.Periods.ListAsync();
-        var teacherSubjects = await uow.TeacherSubjects.ListAsync();
-
-        _classNames = classes.ToDictionary(c => c.Id, Describe);
-        _subjectNames = subjects.ToDictionary(s => s.Id, s => s.Name);
-        _teacherNames = teachers.ToDictionary(t => t.Id, t => t.FullName);
-        _roomNames = rooms.ToDictionary(r => r.Id, r => r.Name);
-        _periodInfo = periods.ToDictionary(
-            p => p.Id,
-            p => (p.Name, p.Order, $"{p.StartTime:HH\\:mm}-{p.EndTime:HH\\:mm}"));
-
-        // Caches for the manual-edit panel.
-        _periods = periods;
-        _rooms = rooms;
-        _teachers = teachers;
-        _teacherIdsBySubject = teacherSubjects
-            .GroupBy(ts => ts.SubjectId)
-            .ToDictionary(g => g.Key, g => g.Select(ts => ts.TeacherId).Distinct().ToList());
-
-        _entries = await uow.TimetableEntries.ListAsync(e => e.GeneratedTimetableId == tt.Id);
-
-        Classes.Add(new ClassFilter { Id = 0, Name = "All classes" });
-        foreach (var cid in _entries.Select(e => e.SchoolClassId).Distinct())
-        {
-            Classes.Add(new ClassFilter
+            if (tt is null && _requestedId != 0)
             {
-                Id = cid,
-                Name = _classNames.TryGetValue(cid, out var n) ? n : $"Class {cid}"
-            });
-        }
+                Status = "That timetable could not be found. It may have been deleted. " +
+                         "Open the Generate screen to create a new one.";
+                return;
+            }
 
-        HasTimetable = true;
-        SelectedClassFilter = Classes.FirstOrDefault();
-        BuildEditSources();
-        SelectedCell = null;
-        Rebuild();
+            if (tt is null)
+            {
+                var forSession = await uow.Timetables.ListAsync(t => t.AcademicSessionId == _state.ActiveSessionId);
+                tt = forSession.FirstOrDefault(t => t.IsSelected)
+                     ?? forSession.OrderByDescending(t => t.Id).FirstOrDefault();
+            }
+
+            if (tt is null)
+            {
+                Status = "No timetable yet. Open the Generate screen to create one.";
+                return;
+            }
+
+            _loadedId = tt.Id;
+            HeaderName = tt.Name;
+            Strategy = tt.Strategy.ToString();
+            Score = tt.Score;
+            IsSelected = tt.IsSelected;
+
+            var classes = await uow.Classes.ListAsync();
+            var subjects = await uow.Subjects.ListAsync();
+            var teachers = await uow.Teachers.ListAsync();
+            var rooms = await uow.Rooms.ListAsync();
+            var periods = await uow.Periods.ListAsync();
+            var teacherSubjects = await uow.TeacherSubjects.ListAsync();
+
+            _classNames = classes.ToDictionary(c => c.Id, Describe);
+            _subjectNames = subjects.ToDictionary(s => s.Id, s => s.Name);
+            _teacherNames = teachers.ToDictionary(t => t.Id, t => t.FullName);
+            _roomNames = rooms.ToDictionary(r => r.Id, r => r.Name);
+            _periodInfo = periods.ToDictionary(
+                p => p.Id,
+                p => (p.Name, p.Order, $"{p.StartTime:HH\\:mm}-{p.EndTime:HH\\:mm}"));
+
+            // Caches for the manual-edit panel.
+            _periods = periods;
+            _rooms = rooms;
+            _teachers = teachers;
+            _teacherIdsBySubject = teacherSubjects
+                .GroupBy(ts => ts.SubjectId)
+                .ToDictionary(g => g.Key, g => g.Select(ts => ts.TeacherId).Distinct().ToList());
+
+            _entries = await uow.TimetableEntries.ListAsync(e => e.GeneratedTimetableId == tt.Id);
+
+            Classes.Add(new ClassFilter { Id = 0, Name = "All classes" });
+            foreach (var cid in _entries.Select(e => e.SchoolClassId).Distinct())
+            {
+                Classes.Add(new ClassFilter
+                {
+                    Id = cid,
+                    Name = _classNames.TryGetValue(cid, out var n) ? n : $"Class {cid}"
+                });
+            }
+
+            // A timetable row with no entries would otherwise render as a blank grid with
+            // no explanation. Treat it as "nothing to show" and tell the admin why.
+            if (_entries.Count == 0)
+            {
+                Status = "This timetable has no lessons saved. Generate it again, or pick another option.";
+                return;
+            }
+
+            HasTimetable = true;
+            SelectedClassFilter = Classes.FirstOrDefault();
+            BuildEditSources();
+            SelectedCell = null;
+            Rebuild();
+        }
+        catch (Exception ex)
+        {
+            // Never let a load error vanish — LoadAsync is called fire-and-forget from the
+            // shell, so an unhandled exception here would leave the screen blank with no
+            // clue. Surface the innermost message (EF wraps missing-column/table errors).
+            HasTimetable = false;
+            var detail = ex.InnerException?.Message ?? ex.Message;
+            Status = "Could not load the timetable: " + detail;
+        }
     }
 
     /// <summary>Fills the day/period/room combos used by the manual-edit panel.</summary>

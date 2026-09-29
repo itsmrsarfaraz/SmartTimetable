@@ -92,9 +92,9 @@ A few terms appear throughout the app. Here is what each means and how they conn
 - **Combined class** — two or more sections that attend a subject *together* in one
   room at one time (e.g. a shared elective). The solver books them into the same slot
   with one teacher and, optionally, one shared room. Managed on *Combined Classes*.
-- **Subject pairing** — two subjects you want to run *at the same time* across a class
+- **Parallel electives** — two subjects you want to run *at the same time* across a class
   so parallel electives line up. This is a *soft* reward: the solver tries to place
-  them in the same period but will not fail if it cannot. Managed on *Subject Pairing*.
+  them in the same period but will not fail if it cannot. Managed on *Parallel Electives*.
 - **Contradictory subject** — a subject *blocked* from a whole program. Classes in that
   program are never scheduled for it (a *hard* rule). Managed on *Contradictory
   Subjects*.
@@ -128,7 +128,7 @@ top-to-bottom:
 | **Classes** | Create each class **and** list its weekly subject demands (this is where you assign teachers to a class). |
 | **Combined Classes** | Group sections that attend one subject together in the same room and time slot. |
 | **Contradictory Subjects** | Block a subject from a program, so its classes are never scheduled for it. |
-| **Subject Pairing** | Ask the solver to run two subjects in the same period so parallel electives line up (soft). |
+| **Parallel Electives** | Ask the solver to run two subjects in the same period so parallel electives line up (soft). |
 | **Teacher Subjects** | Tick which subjects each teacher is qualified to teach. |
 | **Teacher Periods** | Optional: for a teacher's class, choose preferred periods and how strongly to honour them. |
 | **Teacher Availability** | Optional: set the days/periods a teacher can work; the solver never schedules them outside those windows. |
@@ -175,7 +175,7 @@ Do these in order. Each step assumes the one before it is done.
    - *Teacher Periods* — fine-tune when specific teachers teach specific classes.
    - *Teacher Availability* — block the days/periods a teacher cannot work.
    - *Combined Classes* — make sections share one lecture (parallel electives).
-   - *Subject Pairing* — ask two subjects to run in the same period.
+   - *Parallel Electives* — ask two subjects to run in the same period.
    - *Contradictory Subjects* — block a subject from a whole program.
 9. **Generate.** Go to *Generate* → pick one or more strategies and run it.
 10. **Timetable.** Open a result to view, edit, print or export it.
@@ -330,7 +330,7 @@ confusion:
   rooms**, enforced by the solver.
 - **Combined classes** — sections that attend one subject together in the same room and
   time slot (parallel electives).
-- **Subject pairing** — two subjects nudged into the same period so parallel electives
+- **Parallel electives** — two subjects nudged into the same period so parallel electives
   line up (soft reward).
 - **Contradictory subjects** — a subject blocked from a whole program (hard rule).
 - **Generate** with **five strategies** — *Balanced*, *Teacher Friendly*, *Student
@@ -356,7 +356,7 @@ confusion:
 ```
 1. Academic Structure  →  2. Subjects  →  3. Rooms  →  4. Periods  →  5. Teachers  →
 6. Teacher Subjects  →  7. Classes (save class, then add weekly subjects + teachers)  →
-8. optional rules (Teacher Periods / Availability, Combined, Pairing, Contradictory)  →
+8. optional rules (Teacher Periods / Availability, Combined, Parallel Electives, Contradictory)  →
 9. Generate  →  10. open a result in Timetable (view, edit, print/export)
 ```
 

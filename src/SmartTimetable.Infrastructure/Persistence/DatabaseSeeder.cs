@@ -156,8 +156,9 @@ public static class DatabaseSeeder
         {
             FullName = name,
             Type = TeacherType.Permanent,
+            MaxPeriodsPerDay = 6,
             MinWeeklyPeriods = 0,
-            MaxWeeklyPeriods = 30
+            MaxWeeklyPeriods = 42
         };
         foreach (var s in canTeach)
             t.TeacherSubjects.Add(new TeacherSubject { Subject = s });

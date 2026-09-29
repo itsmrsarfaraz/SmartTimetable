@@ -8,7 +8,7 @@ namespace SmartTimetable.Licensing;
 /// </summary>
 public static class VendorPublicKey
 {
-    public const string SpkiBase64 = "";
+    public const string SpkiBase64 = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaHDM2aP4cCPmiX66k+EMgYUeniEg6k1QIcvfppBGY5wtx8FrVpYDvbNYj/5odFJX4zeXJCdTgdWrYB3jcYGexw==";
 
     public static bool IsConfigured => SpkiBase64.Length > 0;
 
